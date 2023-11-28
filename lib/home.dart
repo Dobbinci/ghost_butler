@@ -1,4 +1,6 @@
+
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'login.dart';
 import 'package:rive/rive.dart';
@@ -12,6 +14,8 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
+enum TtsState { playing, stopped, paused, continued }
+
 class _HomePageState extends State<HomePage> {
   late RiveAnimationController _controller;
 
@@ -20,6 +24,9 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _controller = SimpleAnimation('idle');
   }
+
+
+
 
   @override
   Widget build(BuildContext context) {
