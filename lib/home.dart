@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'login.dart';
-import 'package:rive/rive.dart';
+import 'package:rive/rive.dart' as rive;
 
 import 'conversation.dart';
 
@@ -17,18 +17,18 @@ class HomePage extends StatefulWidget {
 enum TtsState { playing, stopped, paused, continued }
 
 class _HomePageState extends State<HomePage> {
-  late RiveAnimationController _controller;
+  late rive.RiveAnimationController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = SimpleAnimation('idle');
+    _controller = rive.SimpleAnimation('idle');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(40, 22, 59, 1.0),
+      backgroundColor: Color.fromRGBO(13, 1, 19, 1.0),
       appBar: AppBar(
         backgroundColor: const Color.fromRGBO(40, 22, 59, 1.0),
         iconTheme: IconThemeData(
@@ -102,7 +102,7 @@ class _HomePageState extends State<HomePage> {
               alignment: Alignment.center,
               child: AspectRatio(
                 aspectRatio: 1,
-                child: RiveAnimation.asset(
+                child: rive.RiveAnimation.asset(
                   'assets/rive/ghost.riv',
                   /*
           controllers: [_controller],
