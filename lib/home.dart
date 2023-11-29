@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'login.dart';
 import 'package:rive/rive.dart';
@@ -7,6 +9,8 @@ import 'package:http/http.dart' as http;
 import 'package:chat_bubbles/bubbles/bubble_normal.dart';
 import 'dart:convert';
 import 'message.dart';
+import 'package:rive/rive.dart' as rive;
+
 import 'conversation.dart';
 const apiKey = "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";
 
@@ -17,6 +21,8 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
+enum TtsState { playing, stopped, paused, continued }
+
 class _HomePageState extends State<HomePage> {
   late RiveAnimationController _controller;
   TextEditingController controller = TextEditingController();
@@ -25,6 +31,7 @@ class _HomePageState extends State<HomePage> {
 
   final CollectionReference _chatCollection =
   FirebaseFirestore.instance.collection('chat');
+  late rive.RiveAnimationController _controller;
 
   @override
   void initState() {
@@ -175,12 +182,13 @@ class _HomePageState extends State<HomePage> {
       ));
       print(errorMessage);
     }
+    _controller = rive.SimpleAnimation('idle');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(40, 22, 59, 1.0),
+      backgroundColor: Color.fromRGBO(13, 1, 19, 1.0),
       appBar: AppBar(
         backgroundColor: const Color.fromRGBO(40, 22, 59, 1.0),
         iconTheme: IconThemeData(
@@ -257,6 +265,13 @@ class _HomePageState extends State<HomePage> {
               child: RiveAnimation.asset(
                 'assets/rive/ghost.riv',
                 /*
+            child: Align(
+              alignment: Alignment.center,
+              child: AspectRatio(
+                aspectRatio: 1,
+                child: rive.RiveAnimation.asset(
+                  'assets/rive/ghost.riv',
+                  /*
           controllers: [_controller],
           onInit: (_) => setState(() {
           }),
