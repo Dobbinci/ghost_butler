@@ -151,12 +151,12 @@ class _ConversationPageState extends State<ConversationPage> {
   Future _setAwaitOptions() async {
     await flutterTts.awaitSpeakCompletion(true);
   }
-
+  //나중에 필요할 수도 있을 것 같아서
   Future _stop() async {
     var result = await flutterTts.stop();
     if (result == 1) setState(() => ttsState = TtsState.stopped);
   }
-
+  //나중에 필요할 수도 있을 것 같아서
   Future _pause() async {
     var result = await flutterTts.pause();
     if (result == 1) setState(() => ttsState = TtsState.paused);
@@ -168,7 +168,7 @@ class _ConversationPageState extends State<ConversationPage> {
     flutterTts.stop();
   }
 
-
+  //여기에 jimmy의 응답을 string으로 넣으면 tts 작동
   void _onChange(String text) {
     setState(() {
       _newVoiceText = text;
@@ -290,7 +290,7 @@ class _ConversationPageState extends State<ConversationPage> {
                 : _speechEnabled
                     ? 'Tap the microphone to start listening...'
                     : 'Speech not available',
-          ),
+          style: TextStyle(color: Colors.white),),
         ),
         Expanded(
             child: Align(

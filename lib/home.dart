@@ -25,9 +25,6 @@ class _HomePageState extends State<HomePage> {
     _controller = SimpleAnimation('idle');
   }
 
-
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,7 +34,6 @@ class _HomePageState extends State<HomePage> {
         iconTheme: IconThemeData(
           color: Colors.white,
         ),
-        //title: Text("Jimmey", style: TextStyle(color: Colors.white),),
       ),
       drawer: Drawer(
         child: ListView(
