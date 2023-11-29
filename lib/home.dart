@@ -1,7 +1,7 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:ghost_butler/profile.dart';
 import 'login.dart';
 import 'package:rive/rive.dart' as rive;
 
@@ -50,7 +50,27 @@ class _HomePageState extends State<HomePage> {
               title: Text('Jimmey'),
               iconColor: const Color.fromRGBO(232, 50, 230, 1.0),
               onTap: () {
-                Navigator.pushNamed(context, '/mypage');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ProfilePage(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(
+                Icons.person,
+              ),
+              title: Text('나의 프로필'),
+              iconColor: const Color.fromRGBO(232, 50, 230, 1.0),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ProfilePage(),
+                  ),
+                );
               },
             ),
             ListTile(
@@ -99,20 +119,20 @@ class _HomePageState extends State<HomePage> {
       body: Column(children: [
         Expanded(
             child: Align(
-              alignment: Alignment.center,
-              child: AspectRatio(
-                aspectRatio: 1,
-                child: rive.RiveAnimation.asset(
-                  'assets/rive/ghost.riv',
-                  /*
+          alignment: Alignment.center,
+          child: AspectRatio(
+            aspectRatio: 1,
+            child: rive.RiveAnimation.asset(
+              'assets/rive/ghost.riv',
+              /*
           controllers: [_controller],
           onInit: (_) => setState(() {
           }),
 
            */
-                ),
-              ),
-            )),
+            ),
+          ),
+        )),
         Align(
           alignment: Alignment.bottomCenter,
           child: Container(
