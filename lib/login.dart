@@ -27,17 +27,6 @@ class _LoginPageState extends State<LoginPage> {
               child: Stack(
             alignment: Alignment.center,
             children: <Widget>[
-              Positioned(
-                  left: -20,
-                  top: -20,
-                  child: Container(
-                    width: 130,
-                    height: 130,
-                    decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color:
-                            Color.fromRGBO(0, 38, 171, 1.0).withOpacity(0.2)),
-                  )),
               //moon
               Positioned(
                   right: width * -0.08,
@@ -104,10 +93,6 @@ class _LoginPageState extends State<LoginPage> {
                   child: Container(
                     width: 200,
                     height: 200,
-                    decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color:
-                            Color.fromRGBO(0, 38, 171, 1.0).withOpacity(0.2)),
                     child: Image.asset('assets/images/ghost_butler_logo.png'),
                   )),
               //button for google sign-in
