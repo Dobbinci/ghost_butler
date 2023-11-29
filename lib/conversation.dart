@@ -156,7 +156,7 @@ class _ConversationPageState extends State<ConversationPage> {
     var result = await flutterTts.stop();
     if (result == 1) setState(() => ttsState = TtsState.stopped);
   }
-  //나중에 필요할 수도 있을 것 같아서
+
   Future _pause() async {
     var result = await flutterTts.pause();
     if (result == 1) setState(() => ttsState = TtsState.paused);
