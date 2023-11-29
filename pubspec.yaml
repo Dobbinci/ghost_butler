@@ -37,7 +37,7 @@ dependencies:
   path_provider: ^2.0.3
   dio: ^5.3.3
   firebase_auth: ^4.12.1
-  firebase_core: ^2.21.0
+  firebase_core: ^2.24.0
   google_sign_in: ^6.1.5
   firebase_storage: ^11.4.1
   image_picker: ^1.0.4
@@ -48,6 +48,8 @@ dependencies:
   cupertino_icons: ^1.0.2
   flutter_tts: ^3.8.5
   speech_to_text: ^6.4.1
+  http: ^1.1.0
+  chat_bubbles: ^1.1.10
   firebase_ui_oauth_google: ^1.2.14
 
 dev_dependencies:
