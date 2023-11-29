@@ -206,7 +206,7 @@ class _ConversationPageState extends State<ConversationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(40, 22, 59, 1.0),
+      backgroundColor: Color.fromRGBO(13, 1, 19, 1.0),
       appBar: AppBar(
         backgroundColor: const Color.fromRGBO(40, 22, 59, 1.0),
         iconTheme: IconThemeData(
@@ -300,6 +300,7 @@ class _ConversationPageState extends State<ConversationPage> {
             ),
           ),
         )),
+        const SizedBox(height: 8.0),
         Align(
           alignment: Alignment.bottomCenter,
           child: Padding(
@@ -315,28 +316,10 @@ class _ConversationPageState extends State<ConversationPage> {
                 fixedSize: const Size(80, 80),
               ),
               child: Icon(
-                  _speechToText.isNotListening ? Icons.mic_off : Icons.mic),
+                  _speechToText.isNotListening ? Icons.mic_off : Icons.mic, color: const Color.fromRGBO(232, 50, 230, 1.0)),
             ),
           ),
         ),
-        Align(
-          alignment: Alignment.bottomCenter,
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 70.0),
-            child: ElevatedButton(
-              onPressed: () {
-                _speak();
-              },
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25),
-                ),
-                fixedSize: const Size(80, 80),
-              ),
-              child: Icon(Icons.surround_sound),
-            ),
-          ),
-        )
       ]),
     );
   }
