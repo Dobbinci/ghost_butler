@@ -11,8 +11,6 @@ import 'dart:async';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 
-import 'login.dart';
-
 class ConversationPage extends StatefulWidget {
   const ConversationPage({Key? key}) : super(key: key);
 
