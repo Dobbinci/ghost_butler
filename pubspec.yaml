@@ -48,6 +48,8 @@ dependencies:
   cupertino_icons: ^1.0.2
   flutter_tts: ^3.8.5
   speech_to_text: ^6.4.1
+  http: ^1.1.0
+  chat_bubbles: ^1.1.10
   firebase_ui_oauth_google: ^1.2.14
 
 dev_dependencies:

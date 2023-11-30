@@ -16,8 +16,6 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
-    print("width: " + width.toString());
-    print("height: " + height.toString());
     return Scaffold(
       backgroundColor: const Color.fromRGBO(40, 22, 59, 1.0),
       body: Column(
