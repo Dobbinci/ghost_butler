@@ -18,7 +18,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'message.dart';
 
-const apiKey = "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";
+const apiKey = "sk-";
 
 class ConversationPage extends StatefulWidget {
   const ConversationPage({Key? key}) : super(key: key);
