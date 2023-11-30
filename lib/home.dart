@@ -263,59 +263,10 @@ class _HomePageState extends State<HomePage> {
               aspectRatio: 1,
               child: RiveAnimation.asset(
                 'assets/rive/ghost.riv',
-                /*
-            child: Align(
-              alignment: Alignment.center,
-              child: AspectRatio(
-                aspectRatio: 1,
-                child: rive.RiveAnimation.asset(
-                  'assets/rive/ghost.riv',
-
-          controllers: [_controller],
-          onInit: (_) => setState(() {
-          }),
-           */
               ),
             ),
           ),
         ),
-        // Expanded(
-        //   child: ListView.builder(
-        //     itemCount: msgs.length,
-        //     shrinkWrap: true,
-        //     reverse: true,
-        //     itemBuilder: (context, index) {
-        //       final message = msgs[index];
-        //       return Padding(
-        //         padding: const EdgeInsets.symmetric(vertical: 4),
-        //         child: isTyping && index == 0
-        //             ? Column(
-        //           children: [
-        //             BubbleNormal(
-        //               text: message.msg,
-        //               isSender: true,
-        //               color: Colors.blue.shade100,
-        //             ),
-        //             const Padding(
-        //               padding: EdgeInsets.only(left: 16, top: 4),
-        //               child: Align(
-        //                 alignment: Alignment.centerLeft,
-        //                 child: Text("Typing..."),
-        //               ),
-        //             )
-        //           ],
-        //         )
-        //             : BubbleNormal(
-        //           text: message.msg,
-        //           isSender: message.isSender,
-        //           color: message.isSender
-        //               ? Colors.blue.shade100
-        //               : Colors.grey.shade200,
-        //         ),
-        //       );
-        //     },
-        //   ),
-        // ),
         Expanded(
           child: ListView.builder(
             itemCount: msgs.length > 2 ? 2 : msgs.length,
