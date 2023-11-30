@@ -6,7 +6,10 @@ import 'package:rive/rive.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
-import 'login.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'dart:async';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ConversationPage extends StatefulWidget {
   const ConversationPage({Key? key}) : super(key: key);
@@ -21,11 +24,153 @@ class _ConversationPageState extends State<ConversationPage> {
   bool _speechEnabled = false;
   String _lastWords = '';
 
+  //fields for TTS
+  late FlutterTts flutterTts;
+  String? language;
+  String? engine;
+  double volume = 0.5;
+  double pitch = 1.0;
+  double rate = 0.5;
+  bool isCurrentLanguageInstalled = false;
+
+  String? _newVoiceText;
+  int? _inputLength;
+
+  TtsState ttsState = TtsState.stopped;
+
+  get isPlaying => ttsState == TtsState.playing;
+  get isStopped => ttsState == TtsState.stopped;
+  get isPaused => ttsState == TtsState.paused;
+  get isContinued => ttsState == TtsState.continued;
+
+  bool get isIOS => !kIsWeb && Platform.isIOS;
+  bool get isAndroid => !kIsWeb && Platform.isAndroid;
+  bool get isWindows => !kIsWeb && Platform.isWindows;
+  bool get isWeb => kIsWeb;
+
+
+
   @override
   void initState() {
     super.initState();
     _initSpeech();
+    initTts();
     _controller = SimpleAnimation('idle');
+  }
+  //initialize for tts
+  initTts() {
+    flutterTts = FlutterTts();
+
+    _setAwaitOptions();
+
+    if (isAndroid) {
+      _getDefaultEngine();
+      _getDefaultVoice();
+    }
+
+    flutterTts.setStartHandler(() {
+      setState(() {
+        print("Playing");
+        ttsState = TtsState.playing;
+      });
+    });
+
+    if (isAndroid) {
+      flutterTts.setInitHandler(() {
+        setState(() {
+          print("TTS Initialized");
+        });
+      });
+    }
+
+    flutterTts.setCompletionHandler(() {
+      setState(() {
+        print("Complete");
+        ttsState = TtsState.stopped;
+      });
+    });
+
+    flutterTts.setCancelHandler(() {
+      setState(() {
+        print("Cancel");
+        ttsState = TtsState.stopped;
+      });
+    });
+
+    flutterTts.setPauseHandler(() {
+      setState(() {
+        print("Paused");
+        ttsState = TtsState.paused;
+      });
+    });
+
+    flutterTts.setContinueHandler(() {
+      setState(() {
+        print("Continued");
+        ttsState = TtsState.continued;
+      });
+    });
+
+    flutterTts.setErrorHandler((msg) {
+      setState(() {
+        print("error: $msg");
+        ttsState = TtsState.stopped;
+      });
+    });
+  }
+
+  Future _getDefaultEngine() async {
+    var engine = await flutterTts.getDefaultEngine;
+    if (engine != null) {
+      print(engine);
+    }
+  }
+
+  Future _getDefaultVoice() async {
+    var voice = await flutterTts.getDefaultVoice;
+    if (voice != null) {
+      print(voice);
+    }
+  }
+
+  Future _speak() async {
+    //var voice = {"locale": "en-US", "gender": "male", 'identifier': 'com.apple.speech.synthesis.voice.Fred', 'name': 'Fred'};
+    await flutterTts.setLanguage('ko-KR');
+    await flutterTts.setVolume(volume);
+    await flutterTts.setSpeechRate(rate);
+    await flutterTts.setPitch(pitch);
+    if (_newVoiceText != null) {
+      if (_newVoiceText!.isNotEmpty) {
+        await flutterTts.speak(_newVoiceText!);
+      }
+    }
+  }
+
+  Future _setAwaitOptions() async {
+    await flutterTts.awaitSpeakCompletion(true);
+  }
+  //나중에 필요할 수도 있을 것 같아서
+  Future _stop() async {
+    var result = await flutterTts.stop();
+    if (result == 1) setState(() => ttsState = TtsState.stopped);
+  }
+
+  Future _pause() async {
+    var result = await flutterTts.pause();
+    if (result == 1) setState(() => ttsState = TtsState.paused);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    flutterTts.stop();
+  }
+
+  //여기에 jimmy의 응답을 string으로 넣으면 tts 작동
+  void _onChange(String text) {
+    setState(() {
+      _newVoiceText = text;
+    });
   }
 
   /// This has to happen only once per app
@@ -54,19 +199,19 @@ class _ConversationPageState extends State<ConversationPage> {
   void _onSpeechResult(SpeechRecognitionResult result) {
     setState(() {
       _lastWords = result.recognizedWords;
+      _onChange(_lastWords);
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(40, 22, 59, 1.0),
+      backgroundColor: Color.fromRGBO(13, 1, 19, 1.0),
       appBar: AppBar(
         backgroundColor: const Color.fromRGBO(40, 22, 59, 1.0),
         iconTheme: IconThemeData(
           color: Colors.white,
         ),
-        //title: Text("Jimmey", style: TextStyle(color: Colors.white),),
       ),
       drawer: Drawer(
         child: ListView(
@@ -143,7 +288,7 @@ class _ConversationPageState extends State<ConversationPage> {
                 : _speechEnabled
                     ? 'Tap the microphone to start listening...'
                     : 'Speech not available',
-          ),
+          style: TextStyle(color: Colors.white),),
         ),
         Expanded(
             child: Align(
@@ -155,13 +300,14 @@ class _ConversationPageState extends State<ConversationPage> {
             ),
           ),
         )),
+        const SizedBox(height: 8.0),
         Align(
           alignment: Alignment.bottomCenter,
           child: Padding(
             padding: const EdgeInsets.only(bottom: 70.0),
             child: ElevatedButton(
               onPressed: () {
-                _speechToText.isNotListening ? _startListening : _stopListening;
+                _speechToText.isNotListening ? _startListening() : _stopListening();
               },
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(
@@ -170,10 +316,10 @@ class _ConversationPageState extends State<ConversationPage> {
                 fixedSize: const Size(80, 80),
               ),
               child: Icon(
-                  _speechToText.isNotListening ? Icons.mic_off : Icons.mic),
+                  _speechToText.isNotListening ? Icons.mic_off : Icons.mic, color: const Color.fromRGBO(232, 50, 230, 1.0)),
             ),
           ),
-        )
+        ),
       ]),
     );
   }
