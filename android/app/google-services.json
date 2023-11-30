@@ -1,65 +1,36 @@
 {
   "project_info": {
-    "project_number": "378871415635",
-    "firebase_url": "https://codelab-firebase-97641-default-rtdb.firebaseio.com",
-    "project_id": "codelab-firebase-97641",
-    "storage_bucket": "codelab-firebase-97641.appspot.com"
+    "project_number": "189103617459",
+    "project_id": "ghost-butler-9a43a",
+    "storage_bucket": "ghost-butler-9a43a.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:378871415635:android:d15347bf6b505d9007d7a6",
+        "mobilesdk_app_id": "1:189103617459:android:59471c7c4416d72240c7c6",
         "android_client_info": {
           "package_name": "com.example.ghost_butler"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "189103617459-id8ac7s8buhgj3q2k4jvjj669he0j5l0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyAY4MgmmCwmDgVE5YpEvdXr-61NqHLAliw"
+          "current_key": "AIzaSyD9FinXfay99QIet3rJ-a10KjAjvyKsEvI"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:378871415635:android:5bcff2418606d14507d7a6",
-        "android_client_info": {
-          "package_name": "com.example.gtk_flutter"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyAY4MgmmCwmDgVE5YpEvdXr-61NqHLAliw"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:378871415635:android:902a0a77f88cb33b07d7a6",
-        "android_client_info": {
-          "package_name": "com.example.jimmey"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyAY4MgmmCwmDgVE5YpEvdXr-61NqHLAliw"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "189103617459-id8ac7s8buhgj3q2k4jvjj669he0j5l0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

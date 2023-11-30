@@ -12,7 +12,7 @@ import 'message.dart';
 import 'package:rive/rive.dart' as rive;
 
 import 'conversation.dart';
-const apiKey = "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";
+const apiKey = "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";
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -31,7 +31,6 @@ class _HomePageState extends State<HomePage> {
 
   final CollectionReference _chatCollection =
   FirebaseFirestore.instance.collection('chat');
-  late rive.RiveAnimationController _controller;
 
   @override
   void initState() {
@@ -271,7 +270,7 @@ class _HomePageState extends State<HomePage> {
                 aspectRatio: 1,
                 child: rive.RiveAnimation.asset(
                   'assets/rive/ghost.riv',
-                  /*
+
           controllers: [_controller],
           onInit: (_) => setState(() {
           }),

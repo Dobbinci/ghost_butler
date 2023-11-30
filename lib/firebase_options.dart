@@ -44,41 +44,39 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyC-A7uzCX-TswM2oLWEaDe3p46Z3GV6stA',
-    appId: '1:378871415635:web:7e40a8315f12064c07d7a6',
-    messagingSenderId: '378871415635',
-    projectId: 'codelab-firebase-97641',
-    authDomain: 'codelab-firebase-97641.firebaseapp.com',
-    databaseURL: 'https://codelab-firebase-97641-default-rtdb.firebaseio.com',
-    storageBucket: 'codelab-firebase-97641.appspot.com',
+    apiKey: 'AIzaSyAiIgJqwyAw9HUioudRLWby55N33V87Z6M',
+    appId: '1:189103617459:web:4bbc39ab8d78dc2340c7c6',
+    messagingSenderId: '189103617459',
+    projectId: 'ghost-butler-9a43a',
+    authDomain: 'ghost-butler-9a43a.firebaseapp.com',
+    storageBucket: 'ghost-butler-9a43a.appspot.com',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAY4MgmmCwmDgVE5YpEvdXr-61NqHLAliw',
-    appId: '1:378871415635:android:d15347bf6b505d9007d7a6',
-    messagingSenderId: '378871415635',
-    projectId: 'codelab-firebase-97641',
-    databaseURL: 'https://codelab-firebase-97641-default-rtdb.firebaseio.com',
-    storageBucket: 'codelab-firebase-97641.appspot.com',
+    apiKey: 'AIzaSyD9FinXfay99QIet3rJ-a10KjAjvyKsEvI',
+    appId: '1:189103617459:android:59471c7c4416d72240c7c6',
+    messagingSenderId: '189103617459',
+    projectId: 'ghost-butler-9a43a',
+    storageBucket: 'ghost-butler-9a43a.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBu66YamU5BY_6FNOR9qhT3d0RJP4NqD28',
-    appId: '1:378871415635:ios:09dbdba6d75cf58407d7a6',
-    messagingSenderId: '378871415635',
-    projectId: 'codelab-firebase-97641',
-    databaseURL: 'https://codelab-firebase-97641-default-rtdb.firebaseio.com',
-    storageBucket: 'codelab-firebase-97641.appspot.com',
-    iosBundleId: 'com.example.ghostButler',
+    apiKey: 'AIzaSyB51Bc6qN9W5-uiTgagAr8QByUGKvfuvx0',
+    appId: '1:189103617459:ios:1721a05cf3f27e2940c7c6',
+    messagingSenderId: '189103617459',
+    projectId: 'ghost-butler-9a43a',
+    storageBucket: 'ghost-butler-9a43a.appspot.com',
+    iosClientId: '189103617459-2v8r9tv7fscrjvqkthqeblgfiilocm33.apps.googleusercontent.com',
+    iosBundleId: 'ghostButler1',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyBu66YamU5BY_6FNOR9qhT3d0RJP4NqD28',
-    appId: '1:378871415635:ios:1518d95019973b6d07d7a6',
-    messagingSenderId: '378871415635',
-    projectId: 'codelab-firebase-97641',
-    databaseURL: 'https://codelab-firebase-97641-default-rtdb.firebaseio.com',
-    storageBucket: 'codelab-firebase-97641.appspot.com',
+    apiKey: 'AIzaSyB51Bc6qN9W5-uiTgagAr8QByUGKvfuvx0',
+    appId: '1:189103617459:ios:64e8d591930d21f740c7c6',
+    messagingSenderId: '189103617459',
+    projectId: 'ghost-butler-9a43a',
+    storageBucket: 'ghost-butler-9a43a.appspot.com',
+    iosClientId: '189103617459-kgao8bpsud2i1g3lpa001fpeshlcki1r.apps.googleusercontent.com',
     iosBundleId: 'com.example.ghostButler.RunnerTests',
   );
 }

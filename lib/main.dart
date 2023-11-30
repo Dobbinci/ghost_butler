@@ -5,6 +5,7 @@ import 'login.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  print('debug');
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
