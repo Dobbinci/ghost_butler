@@ -3,5 +3,5 @@
   "purpose": "FirebaseAppID & ProjectID for this Firebase app in this directory",
   "GOOGLE_APP_ID": "1:189103617459:ios:64e8d591930d21f740c7c6",
   "FIREBASE_PROJECT_ID": "ghost-butler-9a43a",
-  "GCM_SENDER_ID": "1891036174590"
+  "GCM_SENDER_ID": "189103617459"
 }

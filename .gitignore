@@ -44,9 +44,9 @@ app.*.map.json
 /android/app/release
 
 # Firebase settings
-google-services.json
-GoogleService-Info.plist
-firebase_app_id_file.json
-firebase_options.dart
-GeneratedPluginRegistrant.h
-GeneratedPluginRegistrant.m
+/google-services.json
+/GoogleService-Info.plist
+/firebase_app_id_file.json
+/firebase_options.dart
+/GeneratedPluginRegistrant.h
+/GeneratedPluginRegistrant.m
