@@ -1,5 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:lottie/lottie.dart';
 
 import '../home.dart';
@@ -12,6 +15,44 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+
+  //Google sing-in
+  Future<UserCredential> googleSignIn() async {
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth?.accessToken,
+      idToken: googleAuth?.idToken,
+    );
+    UserCredential userCredential =
+    await FirebaseAuth.instance.signInWithCredential(credential);
+    User? user = userCredential.user;
+
+    FirebaseFirestore.instance
+        .collection('user')
+        .doc(user?.uid)
+        .get()
+        .then((DocumentSnapshot snapshot) {
+      if (!snapshot.exists) {
+        //make document in user collection
+        FirebaseFirestore.instance.collection('user').doc(user?.uid).set({
+          'uid': user?.uid,
+          'email': user?.email,
+          'name': user?.displayName,
+        });
+      }
+    });
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const HomePage(),
+      ),
+    );
+
+    return userCredential;
+  }
+
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
@@ -104,14 +145,9 @@ class _LoginPageState extends State<LoginPage> {
                       minimumSize:
                           MaterialStateProperty.all<Size>(Size(150, 50)),
                     ),
-                    onPressed: () => {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const HomePage(),
-                        ),
-                      )
-                    }, //google sign-in method 넣기
+                    onPressed: () {
+                      googleSignIn();
+                    },
                     child: Text("Sign in with Google",
                         style: TextStyle(fontSize: 18, color: Colors.black)),
                   )),
