@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:ghost_butler/setting.dart';
+import 'jimmey_profile.dart';
 import 'login.dart';
 import 'package:rive/rive.dart';
 import 'package:http/http.dart' as http;
@@ -12,7 +14,7 @@ import 'message.dart';
 import 'package:rive/rive.dart' as rive;
 
 import 'conversation.dart';
-const apiKey = "sk-";
+const apiKey = "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";
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -63,7 +65,7 @@ class _HomePageState extends State<HomePage> {
           "Content-Type": "application/json; charset=utf-8",
         },
         body: jsonEncode({
-          "model": "ft:gpt-3.5-turbo-0613:personal::8QUOgwkd",
+          "model": "ft:gpt-3.5-turbo-0613:personal::8QpFYLAC",
           "messages": userMessages
               .map((userMsg) => {"role": "user", "content": userMsg})
               .toList(),
@@ -209,8 +211,12 @@ class _HomePageState extends State<HomePage> {
               title: Text('Jimmey'),
               iconColor: const Color.fromRGBO(232, 50, 230, 1.0),
               onTap: () {
-                Navigator.pushNamed(context, '/mypage');
-              },
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ProfilePage(),
+                  ),
+                );              },
             ),
             ListTile(
               leading: Icon(
@@ -234,8 +240,12 @@ class _HomePageState extends State<HomePage> {
               title: Text('환경설정'),
               iconColor: const Color.fromRGBO(232, 50, 230, 1.0),
               onTap: () {
-                Navigator.pushNamed(context, '/favorite');
-              },
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SettingPage(),
+                  ),
+                );              },
             ),
             ListTile(
               leading: Icon(
@@ -263,59 +273,10 @@ class _HomePageState extends State<HomePage> {
               aspectRatio: 1,
               child: RiveAnimation.asset(
                 'assets/rive/ghost.riv',
-                /*
-            child: Align(
-              alignment: Alignment.center,
-              child: AspectRatio(
-                aspectRatio: 1,
-                child: rive.RiveAnimation.asset(
-                  'assets/rive/ghost.riv',
-
-          controllers: [_controller],
-          onInit: (_) => setState(() {
-          }),
-           */
               ),
             ),
           ),
         ),
-        // Expanded(
-        //   child: ListView.builder(
-        //     itemCount: msgs.length,
-        //     shrinkWrap: true,
-        //     reverse: true,
-        //     itemBuilder: (context, index) {
-        //       final message = msgs[index];
-        //       return Padding(
-        //         padding: const EdgeInsets.symmetric(vertical: 4),
-        //         child: isTyping && index == 0
-        //             ? Column(
-        //           children: [
-        //             BubbleNormal(
-        //               text: message.msg,
-        //               isSender: true,
-        //               color: Colors.blue.shade100,
-        //             ),
-        //             const Padding(
-        //               padding: EdgeInsets.only(left: 16, top: 4),
-        //               child: Align(
-        //                 alignment: Alignment.centerLeft,
-        //                 child: Text("Typing..."),
-        //               ),
-        //             )
-        //           ],
-        //         )
-        //             : BubbleNormal(
-        //           text: message.msg,
-        //           isSender: message.isSender,
-        //           color: message.isSender
-        //               ? Colors.blue.shade100
-        //               : Colors.grey.shade200,
-        //         ),
-        //       );
-        //     },
-        //   ),
-        // ),
         Expanded(
           child: ListView.builder(
             itemCount: msgs.length > 2 ? 2 : msgs.length,
@@ -344,7 +305,7 @@ class _HomePageState extends State<HomePage> {
                 )
                     : BubbleNormal(
                   text: message.msg,
-                  isSender:   message.isSender,
+                  isSender: message.isSender,
                   color: message.isSender
                       ? Colors.blue.shade100
                       : Colors.grey.shade200,
@@ -369,10 +330,6 @@ class _HomePageState extends State<HomePage> {
                     child: Container(
                       width: double.infinity,
                       height: 40,
-                      // decoration: BoxDecoration(
-                      //   color: Colors.grey[200],
-                      //   borderRadius: BorderRadius.circular(10),
-                      // ),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         child: TextField(
@@ -399,10 +356,6 @@ class _HomePageState extends State<HomePage> {
                   child: Container(
                     height: 40,
                     width: 40,
-                    // decoration: BoxDecoration(
-                    //   color: Colors.blue,
-                    //   borderRadius: BorderRadius.circular(30),
-                    // ),
                     child: const Icon(
                       Icons.send,
                       color: Colors.black,
