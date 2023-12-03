@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'home.dart';
@@ -18,7 +19,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'message.dart';
 
-const apiKey = "sk-";
+const apiKey = "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";
 
 class ConversationPage extends StatefulWidget {
   const ConversationPage({Key? key}) : super(key: key);
@@ -46,7 +47,7 @@ class _ConversationPageState extends State<ConversationPage> {
   late FlutterTts flutterTts;
   String? language;
   String? engine;
-  double volume = 0.5;
+  double volume = 1.0;
   double pitch = 1.0;
   double rate = 0.5;
   bool isCurrentLanguageInstalled = false;
@@ -66,67 +67,76 @@ class _ConversationPageState extends State<ConversationPage> {
   bool get isWindows => !kIsWeb && Platform.isWindows;
   bool get isWeb => kIsWeb;
 
-
-
   @override
   void initState() {
     super.initState();
     _initSpeech();
     initTts();
-    _controller = SimpleAnimation('idle');
+    //_subscribeToMessages();
   }
 
   //GPT
-  void _subscribeToMessages() {
-    _chatCollection.orderBy('time').snapshots().listen((snapshot) async {
-      final List<Message> messages = snapshot.docs.map((doc) {
-        return Message.fromSnapshot(doc);
-      }).toList();
+  void _subscribeToMessages() async {
+    print("hello");
+    DocumentReference document = _chatCollection.doc("s");
+    DocumentSnapshot documentSnapshot = await document.get();
+
+    var chatInfo = documentSnapshot.get('chat_info') as List<dynamic> ?? [];
+    final List<Message> messages = chatInfo.map((data) {
+      return Message(
+        isSender: data['isSender'] ?? false,
+        msg: data['msg'] ?? '',
+        time: data['time'] ?? '',
+        name: data['name'] ?? '',
+      );
+    }).toList();
+
+    for (var a in messages) {
+      print(a.msg);
+      print("hello");
+    }
+
+    setState(() {
+      msgs = messages.reversed.toList();
+    });
+
+    // 사용자의 대화 기록을 가져와 GPT에 전달
+    List<String> userMessages =
+    messages.where((msg) => msg.isSender).map((msg) => msg.msg).toList();
+
+    // GPT 모델에 이전 대화를 전달하고 응답을 받음
+    var response = await http.post(
+      Uri.parse("https://api.openai.com/v1/chat/completions"),
+      headers: {
+        "Authorization": "Bearer $apiKey",
+        "Content-Type": "application/json; charset=utf-8",
+      },
+      body: jsonEncode({
+        "model": "ft:gpt-3.5-turbo-0613:personal::8QUOgwkd",
+        "messages": userMessages
+            .map((userMsg) => {"role": "user", "content": userMsg})
+            .toList(),
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      var json = jsonDecode(utf8.decode(response.bodyBytes));
+      String botReply =
+      json["choices"][0]["message"]["content"].toString().trimLeft();
 
       setState(() {
-        msgs = messages.reversed.toList();
+        isTyping = false;
+        msgs.insert(
+          0,
+          Message(
+            isSender: false,
+            msg: botReply,
+            time: DateTime.now().toString(),
+            name: 'ChatBot',
+          ),
+        );
       });
-
-      // 사용자의 대화 기록을 가져와 GPT에 전달
-      List<String> userMessages = messages
-          .where((msg) => msg.isSender)
-          .map((msg) => msg.msg)
-          .toList();
-
-      // GPT 모델에 이전 대화를 전달하고 응답을 받음
-      var response = await http.post(
-        Uri.parse("https://api.openai.com/v1/chat/completions"),
-        headers: {
-          "Authorization": "Bearer $apiKey",
-          "Content-Type": "application/json; charset=utf-8",
-        },
-        body: jsonEncode({
-          "model": "ft:gpt-3.5-turbo-0613:personal::8QUOgwkd",
-          "messages": userMessages
-              .map((userMsg) => {"role": "user", "content": userMsg})
-              .toList(),
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        var json = jsonDecode(utf8.decode(response.bodyBytes));
-        String botReply =
-        json["choices"][0]["message"]["content"].toString().trimLeft();
-
-        setState(() {
-          isTyping = false;
-          msgs.insert(
-            0,
-            Message(
-              isSender: false,
-              msg: botReply,
-              time: DateTime.now().toString(),
-              name: 'ChatBot',
-            ),
-          );
-        });
-      }
-    });
+    }
   }
 
   void sendMsg() async {
@@ -135,7 +145,7 @@ class _ConversationPageState extends State<ConversationPage> {
 
     try {
       if (text.isNotEmpty) {
-        String username = 'unknown';
+        String username = FirebaseAuth.instance.currentUser!.uid;
 
         // 현재 유저에 대한 문서 가져오기 또는 생성
         DocumentReference userDocRef = _chatCollection.doc(username);
@@ -429,7 +439,8 @@ class _ConversationPageState extends State<ConversationPage> {
               ),
               title: Text('로그아웃'),
               iconColor: const Color.fromRGBO(232, 50, 230, 1.0),
-              onTap: () {
+              onTap: () async {
+                await FirebaseAuth.instance.signOut();
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -453,7 +464,7 @@ class _ConversationPageState extends State<ConversationPage> {
                 // recognition is not yet ready or not supported on
                 // the target device
                 : _speechEnabled
-                    ? 'Tap the microphone to start listening...'
+                    ? '마이크 버튼을 누르고 대화를 시작하세요!'
                     : 'Speech not available',
           style: TextStyle(color: Colors.white),),
         ),
@@ -477,8 +488,8 @@ class _ConversationPageState extends State<ConversationPage> {
                 if (_speechToText.isNotListening) {
                   _startListening();
                 } else {
-                  _stopListening();
                   sendMsg();
+                  _stopListening();
                 }
               },
               style: ElevatedButton.styleFrom(

@@ -29,6 +29,7 @@ class _LoginPageState extends State<LoginPage> {
     await FirebaseAuth.instance.signInWithCredential(credential);
     User? user = userCredential.user;
 
+    //user document 생성
     FirebaseFirestore.instance
         .collection('user')
         .doc(user?.uid)
@@ -43,6 +44,7 @@ class _LoginPageState extends State<LoginPage> {
         });
       }
     });
+
     Navigator.push(
       context,
       MaterialPageRoute(
