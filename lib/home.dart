@@ -4,6 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:ghost_butler/setting.dart';
+import 'jimmey_profile.dart';
 import 'login.dart';
 import 'package:rive/rive.dart';
 import 'package:http/http.dart' as http;
@@ -14,7 +16,7 @@ import 'package:rive/rive.dart' as rive;
 
 import 'conversation.dart';
 
-const apiKey = "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";
+const apiKey = "sk"
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -223,8 +225,12 @@ class _HomePageState extends State<HomePage> {
               title: Text('Jimmey'),
               iconColor: const Color.fromRGBO(232, 50, 230, 1.0),
               onTap: () {
-                Navigator.pushNamed(context, '/mypage');
-              },
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ProfilePage(),
+                  ),
+                );              },
             ),
             ListTile(
               leading: Icon(
@@ -248,8 +254,12 @@ class _HomePageState extends State<HomePage> {
               title: Text('환경설정'),
               iconColor: const Color.fromRGBO(232, 50, 230, 1.0),
               onTap: () {
-                Navigator.pushNamed(context, '/favorite');
-              },
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SettingPage(),
+                  ),
+                );              },
             ),
             ListTile(
               leading: Icon(
@@ -335,10 +345,6 @@ class _HomePageState extends State<HomePage> {
                     child: Container(
                       width: double.infinity,
                       height: 40,
-                      // decoration: BoxDecoration(
-                      //   color: Colors.grey[200],
-                      //   borderRadius: BorderRadius.circular(10),
-                      // ),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         child: TextField(
@@ -365,10 +371,6 @@ class _HomePageState extends State<HomePage> {
                   child: Container(
                     height: 40,
                     width: 40,
-                    // decoration: BoxDecoration(
-                    //   color: Colors.blue,
-                    //   borderRadius: BorderRadius.circular(30),
-                    // ),
                     child: const Icon(
                       Icons.send,
                       color: Colors.black,
