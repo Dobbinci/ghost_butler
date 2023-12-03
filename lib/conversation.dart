@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'home.dart';
@@ -5,11 +9,17 @@ import 'login.dart';
 import 'package:rive/rive.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
+import 'package:http/http.dart' as http;
+import 'package:rive/rive.dart' as rive;
 
 import 'package:flutter_tts/flutter_tts.dart';
 import 'dart:async';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
+
+import 'message.dart';
+
+const apiKey = "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";
 
 class ConversationPage extends StatefulWidget {
   const ConversationPage({Key? key}) : super(key: key);
@@ -20,6 +30,15 @@ class ConversationPage extends StatefulWidget {
 
 class _ConversationPageState extends State<ConversationPage> {
   late RiveAnimationController _controller;
+
+  //fields for GPT
+  List<Message> msgs = [];
+  bool isTyping = false;
+
+  final CollectionReference _chatCollection =
+  FirebaseFirestore.instance.collection('chat');
+
+  //fields for STT
   SpeechToText _speechToText = SpeechToText();
   bool _speechEnabled = false;
   String _lastWords = '';
@@ -28,7 +47,7 @@ class _ConversationPageState extends State<ConversationPage> {
   late FlutterTts flutterTts;
   String? language;
   String? engine;
-  double volume = 0.5;
+  double volume = 1.0;
   double pitch = 1.0;
   double rate = 0.5;
   bool isCurrentLanguageInstalled = false;
@@ -48,15 +67,174 @@ class _ConversationPageState extends State<ConversationPage> {
   bool get isWindows => !kIsWeb && Platform.isWindows;
   bool get isWeb => kIsWeb;
 
-
-
   @override
   void initState() {
     super.initState();
     _initSpeech();
     initTts();
-    _controller = SimpleAnimation('idle');
+    //_subscribeToMessages();
   }
+
+  //GPT
+  void _subscribeToMessages() async {
+    print("hello");
+    DocumentReference document = _chatCollection.doc("s");
+    DocumentSnapshot documentSnapshot = await document.get();
+
+    var chatInfo = documentSnapshot.get('chat_info') as List<dynamic> ?? [];
+    final List<Message> messages = chatInfo.map((data) {
+      return Message(
+        isSender: data['isSender'] ?? false,
+        msg: data['msg'] ?? '',
+        time: data['time'] ?? '',
+        name: data['name'] ?? '',
+      );
+    }).toList();
+
+    for (var a in messages) {
+      print(a.msg);
+      print("hello");
+    }
+
+    setState(() {
+      msgs = messages.reversed.toList();
+    });
+
+    // 사용자의 대화 기록을 가져와 GPT에 전달
+    List<String> userMessages =
+    messages.where((msg) => msg.isSender).map((msg) => msg.msg).toList();
+
+    // GPT 모델에 이전 대화를 전달하고 응답을 받음
+    var response = await http.post(
+      Uri.parse("https://api.openai.com/v1/chat/completions"),
+      headers: {
+        "Authorization": "Bearer $apiKey",
+        "Content-Type": "application/json; charset=utf-8",
+      },
+      body: jsonEncode({
+        "model": "ft:gpt-3.5-turbo-0613:personal::8QUOgwkd",
+        "messages": userMessages
+            .map((userMsg) => {"role": "user", "content": userMsg})
+            .toList(),
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      var json = jsonDecode(utf8.decode(response.bodyBytes));
+      String botReply =
+      json["choices"][0]["message"]["content"].toString().trimLeft();
+
+      setState(() {
+        isTyping = false;
+        msgs.insert(
+          0,
+          Message(
+            isSender: false,
+            msg: botReply,
+            time: DateTime.now().toString(),
+            name: 'ChatBot',
+          ),
+        );
+      });
+    }
+  }
+
+  void sendMsg() async {
+    //GPT에게 stt로 변환된 text 전달
+    String text = _lastWords;
+
+    try {
+      if (text.isNotEmpty) {
+        String username = FirebaseAuth.instance.currentUser!.uid;
+
+        // 현재 유저에 대한 문서 가져오기 또는 생성
+        DocumentReference userDocRef = _chatCollection.doc(username);
+
+        // 기존 메세지 가져오기
+        DocumentSnapshot userDoc = await userDocRef.get();
+        List<dynamic> messages = userDoc.exists
+            ? (userDoc['chat_info'] as List<dynamic>)
+            : [];
+
+        // 새 메세지 추가
+        messages.add({
+          'isSender': true,
+          'msg': text,
+          'time': DateTime.now().toString(),
+        });
+
+        // 업데이트된 메세지로 문서 업데이트
+        await userDocRef.set({'chat_info': messages}, SetOptions(merge: true));
+
+        setState(() {
+          msgs.insert(
+            0,
+            Message(
+              isSender: true,
+              msg: text,
+              time: DateTime.now().toString(),
+              name: 'YourUsername',
+            ),
+          );
+          isTyping = true;
+        });
+
+        // GPT 모델에 이전 대화를 전달하고 응답을 받음
+        var response = await http.post(
+          Uri.parse("https://api.openai.com/v1/chat/completions"),
+          headers: {
+            "Authorization": "Bearer $apiKey",
+            "Content-Type": "application/json; charset=utf-8",
+          },
+          body: jsonEncode({
+            "model": "ft:gpt-3.5-turbo-0613:personal::8MsGwaSy",
+            "messages": messages
+                .map((msg) => {"role": msg['isSender'] ? "user" : "assistant", "content": msg['msg']})
+                .toList(),
+          }),
+        );
+
+        if (response.statusCode == 200) {
+          var json = jsonDecode(utf8.decode(response.bodyBytes));
+          String botReply = json["choices"][0]["message"]["content"].toString().trimLeft();
+
+          // 새로운 챗봇 메세지 추가
+          messages.add({
+            'isSender': false,
+            'msg': botReply,
+            'time': DateTime.now().toString(),
+          });
+          _onChange(botReply);
+          _speak();
+
+          // 업데이트된 메세지로 문서 업데이트
+          await userDocRef.set({'chat_info': messages}, SetOptions(merge: true));
+
+          setState(() {
+            isTyping = false;
+            msgs.insert(
+              0,
+              Message(
+                isSender: false,
+                msg: botReply,
+                time: DateTime.now().toString(),
+                name: 'ChatBot',
+              ),
+            );
+          });
+        }
+      }
+    } catch (e) {
+      final errorMessage = "오류 발생: $e";
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(errorMessage),
+      ));
+      print(errorMessage);
+    }
+    _controller = rive.SimpleAnimation('idle');
+  }
+
+
   //initialize for tts
   initTts() {
     flutterTts = FlutterTts();
@@ -199,7 +377,6 @@ class _ConversationPageState extends State<ConversationPage> {
   void _onSpeechResult(SpeechRecognitionResult result) {
     setState(() {
       _lastWords = result.recognizedWords;
-      _onChange(_lastWords);
     });
   }
 
@@ -262,7 +439,8 @@ class _ConversationPageState extends State<ConversationPage> {
               ),
               title: Text('로그아웃'),
               iconColor: const Color.fromRGBO(232, 50, 230, 1.0),
-              onTap: () {
+              onTap: () async {
+                await FirebaseAuth.instance.signOut();
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -286,7 +464,7 @@ class _ConversationPageState extends State<ConversationPage> {
                 // recognition is not yet ready or not supported on
                 // the target device
                 : _speechEnabled
-                    ? 'Tap the microphone to start listening...'
+                    ? '마이크 버튼을 누르고 대화를 시작하세요!'
                     : 'Speech not available',
           style: TextStyle(color: Colors.white),),
         ),
@@ -307,7 +485,12 @@ class _ConversationPageState extends State<ConversationPage> {
             padding: const EdgeInsets.only(bottom: 70.0),
             child: ElevatedButton(
               onPressed: () {
-                _speechToText.isNotListening ? _startListening() : _stopListening();
+                if (_speechToText.isNotListening) {
+                  _startListening();
+                } else {
+                  sendMsg();
+                  _stopListening();
+                }
               },
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(
