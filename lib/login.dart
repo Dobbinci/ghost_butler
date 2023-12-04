@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:ghost_butler/singup.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:lottie/lottie.dart';
 
@@ -29,28 +30,41 @@ class _LoginPageState extends State<LoginPage> {
     await FirebaseAuth.instance.signInWithCredential(credential);
     User? user = userCredential.user;
 
-    //user document 생성
-    FirebaseFirestore.instance
-        .collection('user')
-        .doc(user?.uid)
-        .get()
-        .then((DocumentSnapshot snapshot) {
-      if (!snapshot.exists) {
-        //make document in user collection
-        FirebaseFirestore.instance.collection('user').doc(user?.uid).set({
-          'uid': user?.uid,
-          'email': user?.email,
-          'name': user?.displayName,
-        });
-      }
-    });
+    DocumentReference docRef = FirebaseFirestore.instance.collection('user').doc(user?.uid);
+    DocumentSnapshot documentSnapshot = await docRef.get();
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const HomePage(),
-      ),
-    );
+    if (documentSnapshot.exists) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const HomePage(),
+        ),
+      );
+    }
+    else {
+      //user document 생성
+      FirebaseFirestore.instance
+          .collection('user')
+          .doc(user?.uid)
+          .get()
+          .then((DocumentSnapshot snapshot) {
+        if (!snapshot.exists) {
+          //make document in user collection
+          FirebaseFirestore.instance.collection('user').doc(user?.uid).set({
+            'uid': user?.uid,
+            'email': user?.email,
+          });
+        }
+      });
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const SignUpPage(),
+        ),
+      );
+    }
+
+
 
     return userCredential;
   }
