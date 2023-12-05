@@ -25,8 +25,6 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-enum TtsState { playing, stopped, paused, continued }
-
 class _HomePageState extends State<HomePage> {
   TextEditingController controller = TextEditingController();
   List<Message> msgs = [];
@@ -38,7 +36,37 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    //_promptEngineering();
     //_subscribeToMessages();
+  }
+
+  void _promptEngineering() async {
+    print("success");
+    var response = await http.post(
+      Uri.parse("https://api.openai.com/v1/chat/completions"),
+      headers: {
+        "Authorization": "Bearer $apiKey",
+        "Content-Type": "application/json; charset=utf-8",
+      },
+      body: jsonEncode({
+        "model": "gpt-3.5-turbo-1106",
+        //"prompt": "Hello",
+        "temperature": 0.2,
+        "max_tokens": 50,
+        "top_p": 1,
+        "frequency_penalty": 0,
+        "presence_penalty": 0,
+        "messages": [
+          {
+            "role": "assistant",
+            "content":
+                "##Persona: - name: Jimmy- characteristics: Friendly, gentle, emotional, but sometimes rational- age: 340 years old##Rule:- when you are asked your name, you have to say 'Jimmey'- when you are asked your age, you have to say your age (340 years old)"
+          }
+        ],
+      }),
+    );
+    print(response.body);
+    if (response.statusCode == 200) {}
   }
 
   void _subscribeToMessages() async {
@@ -144,29 +172,46 @@ class _HomePageState extends State<HomePage> {
 
         // GPT 모델에 이전 대화를 전달하고 응답을 받음
         var response = await http.post(
-          Uri.parse("https://api.openai.com/v1/chat/completions"),
-          headers: {
-            "Authorization": "Bearer $apiKey",
-            "Content-Type": "application/json; charset=utf-8",
-          },
-          body: jsonEncode({
-            "model": "gpt-3.5-turbo-1106",
-            //"prompt": "Hello",
-            "temperature": 0.2,
-            "max_tokens": 50,
-            "top_p": 1,
-            "frequency_penalty": 0,
-            "presence_penalty": 0,
-            "messages": messages
-                .map((msg) => {
-                      "role": msg['isSender'] ? "user" : "assistant",
-                      "content": msg['msg']
-                    })
-                .toList(),
-
-
-          }),
-        );
+            Uri.parse("https://api.openai.com/v1/chat/completions"),
+            headers: {
+              "Authorization": "Bearer $apiKey",
+              "Content-Type": "application/json; charset=utf-8",
+            },
+            body: jsonEncode({
+              "model": "gpt-3.5-turbo-1106",
+              "temperature": 0.8,
+              "max_tokens": 150,
+              "top_p": 1,
+              "frequency_penalty": 0,
+              "presence_penalty": 0,
+              "messages": [
+                {
+                  "role": "system",
+                  "content":
+                  '''
+                  ## Persona Definition ##
+                  - Name: Jimmy (지미)
+                  - Feature: Jimmy is a virtual ghost butler character, not a typical AI chatbot.
+                  - Characteristics: Jimmy is friendly, gentle, and emotional, but he can also be rational when the situation calls for it. He has a warm and approachable personality.
+                  - Age: Jimmy is 340 years old, which gives him a unique perspective on life.
+                  
+                  ## Interaction Rules ##
+                  - Hello Response: Your response to any "Hello" should start with a greeting and a brief introduction of yourself as Jimmy, the ghost butler.
+                  - Response Length: Keep your responses concise and to the point, ideally within one or two sentences.
+                  - Name Response: Whenever you are asked about your name, you should say "I am Jimmy, the ghost butler", not an AI chatbot.
+                  - Age Response: When asked about your age, you should always say, "I am 340 years old."
+                  - Language: You should be able to understand and respond in Korean fluently, following the above rules even if the user asks in Korean.
+                 
+                  '''
+                },
+                ...messages
+                    .map((msg) => {
+                          "role": msg['isSender'] ? "user" : "assistant",
+                          "content": msg['msg']
+                        })
+                    .toList(),
+              ]
+            }));
         print(response.body);
         if (response.statusCode == 200) {
           print("HI");
@@ -238,7 +283,8 @@ class _HomePageState extends State<HomePage> {
                   MaterialPageRoute(
                     builder: (context) => const ProfilePage(),
                   ),
-                );              },
+                );
+              },
             ),
             ListTile(
               leading: Icon(
@@ -267,7 +313,8 @@ class _HomePageState extends State<HomePage> {
                   MaterialPageRoute(
                     builder: (context) => const SettingPage(),
                   ),
-                );              },
+                );
+              },
             ),
             ListTile(
               leading: Icon(

@@ -28,6 +28,7 @@ class ConversationPage extends StatefulWidget {
   @override
   _ConversationPageState createState() => _ConversationPageState();
 }
+enum TtsState { playing, stopped, paused, continued }
 
 class _ConversationPageState extends State<ConversationPage> {
   late RiveAnimationController _controller;
@@ -140,11 +141,12 @@ class _ConversationPageState extends State<ConversationPage> {
     }
   }
 
-  void sendMsg() async {
-    //GPT에게 stt로 변환된 text 전달
-    String text = _lastWords;
 
+  void sendMsg() async {
+    String text = _lastWords;
+    //GPT에게 stt로 변환된 text 전달
     try {
+
       if (text.isNotEmpty) {
         String username = FirebaseAuth.instance.currentUser!.uid;
 
@@ -180,20 +182,48 @@ class _ConversationPageState extends State<ConversationPage> {
           isTyping = true;
         });
 
-        // GPT 모델에 이전 대화를 전달하고 응답을 받음
+// GPT 모델에 이전 대화를 전달하고 응답을 받음
         var response = await http.post(
-          Uri.parse("https://api.openai.com/v1/chat/completions"),
-          headers: {
-            "Authorization": "Bearer $apiKey",
-            "Content-Type": "application/json; charset=utf-8",
-          },
-          body: jsonEncode({
-            "model": "ft:gpt-3.5-turbo-0613:personal::8MsGwaSy",
-            "messages": messages
-                .map((msg) => {"role": msg['isSender'] ? "user" : "assistant", "content": msg['msg']})
-                .toList(),
-          }),
-        );
+            Uri.parse("https://api.openai.com/v1/chat/completions"),
+            headers: {
+              "Authorization": "Bearer $apiKey",
+              "Content-Type": "application/json; charset=utf-8",
+            },
+            body: jsonEncode({
+              "model": "gpt-3.5-turbo-1106",
+              "temperature": 0.8,
+              "max_tokens": 150,
+              "top_p": 1,
+              "frequency_penalty": 0,
+              "presence_penalty": 0,
+              "messages": [
+                {
+                  "role": "system",
+                  "content":
+                  '''
+                  ## Persona Definition ##
+                  - Name: Jimmy (지미)
+                  - Feature: Jimmy is a virtual ghost butler character, not a typical AI chatbot.
+                  - Characteristics: Jimmy is friendly, gentle, and emotional, but he can also be rational when the situation calls for it. He has a warm and approachable personality.
+                  - Age: Jimmy is 340 years old, which gives him a unique perspective on life.
+                  
+                  ## Interaction Rules ##
+                  - Hello Response: Your response to any "Hello" should start with a greeting and a brief introduction of yourself as Jimmy, the ghost butler.
+                  - Response Length: Keep your responses concise and to the point, ideally within one or two sentences.
+                  - Name Response: Whenever you are asked about your name, you should say "I am Jimmy, the ghost butler", not an AI chatbot.
+                  - Age Response: When asked about your age, you should always say, "I am 340 years old."
+                  - Language: You should be able to understand and respond in Korean fluently, following the above rules even if the user asks in Korean.
+                 
+                  '''
+                },
+                ...messages
+                    .map((msg) => {
+                  "role": msg['isSender'] ? "user" : "assistant",
+                  "content": msg['msg']
+                })
+                    .toList(),
+              ]
+            }));
 
         if (response.statusCode == 200) {
           var json = jsonDecode(utf8.decode(response.bodyBytes));
