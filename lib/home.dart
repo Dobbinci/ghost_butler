@@ -16,7 +16,7 @@ import 'package:rive/rive.dart' as rive;
 
 import 'conversation.dart';
 
-const apiKey = "sk-";
+const apiKey = "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";
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -58,7 +58,6 @@ class _HomePageState extends State<HomePage> {
 
     for (var a in messages) {
       print(a.msg);
-      print("hello");
     }
 
     setState(() {

@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'home.dart';
+import 'jimmey_profile.dart';
 import 'login.dart';
 import 'package:rive/rive.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
@@ -19,7 +20,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'message.dart';
 
-const apiKey = "sk-";
+const apiKey = "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";
 
 class ConversationPage extends StatefulWidget {
   const ConversationPage({Key? key}) : super(key: key);
@@ -405,7 +406,12 @@ class _ConversationPageState extends State<ConversationPage> {
               title: Text('Jimmey'),
               iconColor: const Color.fromRGBO(232, 50, 230, 1.0),
               onTap: () {
-                Navigator.pushNamed(context, '/mypage');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ProfilePage(),
+                  ),
+                );
               },
             ),
             ListTile(
