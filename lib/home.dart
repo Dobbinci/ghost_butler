@@ -16,7 +16,7 @@ import 'package:rive/rive.dart' as rive;
 
 import 'conversation.dart';
 
-const apiKey = "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";
+const apiKey = "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";
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -150,20 +150,29 @@ class _HomePageState extends State<HomePage> {
             "Content-Type": "application/json; charset=utf-8",
           },
           body: jsonEncode({
-            "model": "ft:gpt-3.5-turbo-0613:personal::8MsGwaSy",
+            "model": "gpt-3.5-turbo-1106",
+            //"prompt": "Hello",
+            "temperature": 0.2,
+            "max_tokens": 50,
+            "top_p": 1,
+            "frequency_penalty": 0,
+            "presence_penalty": 0,
             "messages": messages
                 .map((msg) => {
                       "role": msg['isSender'] ? "user" : "assistant",
                       "content": msg['msg']
                     })
                 .toList(),
+
+
           }),
         );
-
+        print(response.body);
         if (response.statusCode == 200) {
+          print("HI");
           var json = jsonDecode(utf8.decode(response.bodyBytes));
           String botReply =
-              json["choices"][0]["message"]["content"].toString().trimLeft();
+              json["choices"][0]["message"]['content'].toString().trimLeft();
 
           // 새로운 챗봇 메세지 추가
           messages.add({
