@@ -20,7 +20,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'message.dart';
 
-const apiKey = "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";
+const apiKey = "sk-";
 
 class ConversationPage extends StatefulWidget {
   const ConversationPage({Key? key}) : super(key: key);
@@ -74,73 +74,7 @@ class _ConversationPageState extends State<ConversationPage> {
     super.initState();
     _initSpeech();
     initTts();
-    //_subscribeToMessages();
   }
-
-  //GPT
-  void _subscribeToMessages() async {
-    print("hello");
-    DocumentReference document = _chatCollection.doc("s");
-    DocumentSnapshot documentSnapshot = await document.get();
-
-    var chatInfo = documentSnapshot.get('chat_info') as List<dynamic> ?? [];
-    final List<Message> messages = chatInfo.map((data) {
-      return Message(
-        isSender: data['isSender'] ?? false,
-        msg: data['msg'] ?? '',
-        time: data['time'] ?? '',
-        name: data['name'] ?? '',
-      );
-    }).toList();
-
-    for (var a in messages) {
-      print(a.msg);
-      print("hello");
-    }
-
-    setState(() {
-      msgs = messages.reversed.toList();
-    });
-
-    // 사용자의 대화 기록을 가져와 GPT에 전달
-    List<String> userMessages =
-    messages.where((msg) => msg.isSender).map((msg) => msg.msg).toList();
-
-    // GPT 모델에 이전 대화를 전달하고 응답을 받음
-    var response = await http.post(
-      Uri.parse("https://api.openai.com/v1/chat/completions"),
-      headers: {
-        "Authorization": "Bearer $apiKey",
-        "Content-Type": "application/json; charset=utf-8",
-      },
-      body: jsonEncode({
-        "model": "ft:gpt-3.5-turbo-0613:personal::8QUOgwkd",
-        "messages": userMessages
-            .map((userMsg) => {"role": "user", "content": userMsg})
-            .toList(),
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      var json = jsonDecode(utf8.decode(response.bodyBytes));
-      String botReply =
-      json["choices"][0]["message"]["content"].toString().trimLeft();
-
-      setState(() {
-        isTyping = false;
-        msgs.insert(
-          0,
-          Message(
-            isSender: false,
-            msg: botReply,
-            time: DateTime.now().toString(),
-            name: 'ChatBot',
-          ),
-        );
-      });
-    }
-  }
-
 
   void sendMsg() async {
     String text = _lastWords;
@@ -190,8 +124,8 @@ class _ConversationPageState extends State<ConversationPage> {
               "Content-Type": "application/json; charset=utf-8",
             },
             body: jsonEncode({
-              "model": "gpt-3.5-turbo-1106",
-              "temperature": 0.9,
+              "model": "ft:gpt-3.5-turbo-1106:personal::8ScNNuzE",
+              "temperature": 0.5,
               "max_tokens": 150,
               "top_p": 1,
               "frequency_penalty": 0,

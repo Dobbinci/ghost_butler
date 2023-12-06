@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({Key? key}) : super(key: key);
@@ -41,9 +43,14 @@ class _SettingPageState extends State<SettingPage> {
                     content: Text('대화 기록을 삭제하시겠습니까?'),
                     actions: [
                       TextButton(
-                        onPressed: () {
+                        onPressed: () async {
                           // 삭제 로직 추가
-                          // 예: 데이터베이스에서 대화 기록 삭제
+                          User? user = FirebaseAuth.instance.currentUser;
+                          if (user != null) {
+                            DocumentReference chatRef =
+                            FirebaseFirestore.instance.collection('chat').doc(user.uid);
+                            await chatRef.delete();
+                          }
                           Navigator.pop(context);
                         },
                         child: Text('확인'),
@@ -77,8 +84,6 @@ class _SettingPageState extends State<SettingPage> {
               onChanged: (value) {
                 setState(() {
                   pushNotificationEnabled = value;
-                  // 여기에 푸시 알림 활성화 여부에 따른 로직 추가
-                  // 예: 푸시 알림 API 호출, 설정값 저장 등
                 });
               },
             ),

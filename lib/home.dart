@@ -16,7 +16,7 @@ import 'package:rive/rive.dart' as rive;
 
 import 'conversation.dart';
 
-const apiKey = "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";
+const apiKey = "sk-";
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -36,99 +36,6 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    //_promptEngineering();
-    //_subscribeToMessages();
-  }
-
-  void _promptEngineering() async {
-    print("success");
-    var response = await http.post(
-      Uri.parse("https://api.openai.com/v1/chat/completions"),
-      headers: {
-        "Authorization": "Bearer $apiKey",
-        "Content-Type": "application/json; charset=utf-8",
-      },
-      body: jsonEncode({
-        "model": "gpt-3.5-turbo-1106",
-        //"prompt": "Hello",
-        "temperature": 0.2,
-        "max_tokens": 50,
-        "top_p": 1,
-        "frequency_penalty": 0,
-        "presence_penalty": 0,
-        "messages": [
-          {
-            "role": "assistant",
-            "content":
-                "##Persona: - name: Jimmy- characteristics: Friendly, gentle, emotional, but sometimes rational- age: 340 years old##Rule:- when you are asked your name, you have to say 'Jimmey'- when you are asked your age, you have to say your age (340 years old)"
-          }
-        ],
-      }),
-    );
-    print(response.body);
-    if (response.statusCode == 200) {}
-  }
-
-  void _subscribeToMessages() async {
-    String username = FirebaseAuth.instance.currentUser!.uid;
-    DocumentReference document = _chatCollection.doc(username);
-    DocumentSnapshot documentSnapshot = await document.get();
-
-    var chatInfo = documentSnapshot.get('chat_info') as List<dynamic> ?? [];
-    final List<Message> messages = chatInfo.map((data) {
-      return Message(
-        isSender: data['isSender'] ?? false,
-        msg: data['msg'] ?? '',
-        time: data['time'] ?? '',
-        name: data['name'] ?? '',
-      );
-    }).toList();
-
-    for (var a in messages) {
-      print(a.msg);
-    }
-
-    setState(() {
-      msgs = messages.reversed.toList();
-    });
-
-    // 사용자의 대화 기록을 가져와 GPT에 전달
-    List<String> userMessages =
-        messages.where((msg) => msg.isSender).map((msg) => msg.msg).toList();
-
-    // GPT 모델에 이전 대화를 전달하고 응답을 받음
-    var response = await http.post(
-      Uri.parse("https://api.openai.com/v1/chat/completions"),
-      headers: {
-        "Authorization": "Bearer $apiKey",
-        "Content-Type": "application/json; charset=utf-8",
-      },
-      body: jsonEncode({
-        "model": "ft:gpt-3.5-turbo-0613:personal::8QUOgwkd",
-        "messages": userMessages
-            .map((userMsg) => {"role": "user", "content": userMsg})
-            .toList(),
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      var json = jsonDecode(utf8.decode(response.bodyBytes));
-      String botReply =
-          json["choices"][0]["message"]["content"].toString().trimLeft();
-
-      setState(() {
-        isTyping = false;
-        msgs.insert(
-          0,
-          Message(
-            isSender: false,
-            msg: botReply,
-            time: DateTime.now().toString(),
-            name: 'ChatBot',
-          ),
-        );
-      });
-    }
   }
 
   void sendMsg() async {
@@ -178,8 +85,8 @@ class _HomePageState extends State<HomePage> {
               "Content-Type": "application/json; charset=utf-8",
             },
             body: jsonEncode({
-              "model": "gpt-3.5-turbo-1106",
-              "temperature": 0.9,
+                "model": "ft:gpt-3.5-turbo-1106:personal::8ScNNuzE",
+              "temperature": 0.5,
               "max_tokens": 150,
               "top_p": 1,
               "frequency_penalty": 0,
@@ -197,7 +104,7 @@ class _HomePageState extends State<HomePage> {
                   
                   ## Interaction Rules ##
                   - Hello Response: Your response to any "Hello" should start with a greeting and a brief introduction of yourself as Jimmy, the ghost butler.
-                  - Response Length: Keep your responses concise and to the point, ideally within one or two sentences.
+                  - Response Length: Keep your responses concise and to the point, ideally within one or two or three sentences.
                   - Name Response: Whenever you are asked about your name, you should say "I am Jimmy, the ghost butler", not an AI chatbot.
                   - Age Response: When asked about your age, you should always say, "I am 340 years old."
                   - Language: You should be able to understand and respond in Korean fluently, following the above rules even if the user asks in Korean.
@@ -215,9 +122,7 @@ class _HomePageState extends State<HomePage> {
                     .toList(),
               ]
             }));
-        print(response.body);
         if (response.statusCode == 200) {
-          print("HI");
           var json = jsonDecode(utf8.decode(response.bodyBytes));
           String botReply =
               json["choices"][0]["message"]['content'].toString().trimLeft();
@@ -278,7 +183,7 @@ class _HomePageState extends State<HomePage> {
               leading: Icon(
                 Icons.person,
               ),
-              title: Text('Jimmey'),
+              title: Text('Jimmy 프로필'),
               iconColor: const Color.fromRGBO(232, 50, 230, 1.0),
               onTap: () {
                 Navigator.push(
