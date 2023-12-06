@@ -195,7 +195,7 @@ class _ConversationPageState extends State<ConversationPage> {
               "max_tokens": 150,
               "top_p": 1,
               "frequency_penalty": 0,
-              "presence_penalty": 1,
+              "presence_penalty": 0.5,
               "messages": [
                 {
                   "role": "system",
