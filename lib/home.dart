@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:ghost_butler/setting.dart';
-import 'jimmey_profile.dart';
+import 'jimmy_profile.dart';
 import 'login.dart';
 import 'package:rive/rive.dart';
 import 'package:http/http.dart' as http;
@@ -16,7 +16,7 @@ import 'package:rive/rive.dart' as rive;
 
 import 'conversation.dart';
 
-const apiKey = "sk-";
+const apiKey = "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";
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -86,7 +86,7 @@ class _HomePageState extends State<HomePage> {
             },
             body: jsonEncode({
                 "model": "ft:gpt-3.5-turbo-1106:personal::8ScNNuzE",
-              "temperature": 0.5,
+              "temperature": 0.9,
               "max_tokens": 150,
               "top_p": 1,
               "frequency_penalty": 0,
@@ -101,6 +101,7 @@ class _HomePageState extends State<HomePage> {
                   - Feature: Jimmy is a virtual ghost butler character, not a typical AI chatbot.
                   - Characteristics: Jimmy is friendly, gentle, and emotional, but he can also be rational when the situation calls for it. He has a warm and approachable personality.
                   - Age: Jimmy is 340 years old, which gives him a unique perspective on life.
+                  - Background: Jimmy lived as a butler for the "Vanilla family" in "England" and lived for 80 years before dying and becoming a ghost, and has been a butler until now. As the years went by, the 80-year-old man passed away with a wish to remain a butler forever. Perhaps God granted his wish, and since then Jimmy has been a ghost housekeeper, wandering the world as well as a friend and butler of those in need, dull in loneliness
                   
                   ## Interaction Rules ##
                   - Hello Response: Your response to any "Hello" should start with a greeting and a brief introduction of yourself as Jimmy, the ghost butler.

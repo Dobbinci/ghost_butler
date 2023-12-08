@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'home.dart';
-import 'jimmey_profile.dart';
+import 'jimmy_profile.dart';
 import 'login.dart';
 import 'package:rive/rive.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
@@ -20,7 +20,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'message.dart';
 
-const apiKey = "sk-";
+const apiKey = "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";
 
 class ConversationPage extends StatefulWidget {
   const ConversationPage({Key? key}) : super(key: key);
@@ -28,6 +28,7 @@ class ConversationPage extends StatefulWidget {
   @override
   _ConversationPageState createState() => _ConversationPageState();
 }
+
 enum TtsState { playing, stopped, paused, continued }
 
 class _ConversationPageState extends State<ConversationPage> {
@@ -38,7 +39,7 @@ class _ConversationPageState extends State<ConversationPage> {
   bool isTyping = false;
 
   final CollectionReference _chatCollection =
-  FirebaseFirestore.instance.collection('chat');
+      FirebaseFirestore.instance.collection('chat');
 
   //fields for STT
   SpeechToText _speechToText = SpeechToText();
@@ -60,13 +61,19 @@ class _ConversationPageState extends State<ConversationPage> {
   TtsState ttsState = TtsState.stopped;
 
   get isPlaying => ttsState == TtsState.playing;
+
   get isStopped => ttsState == TtsState.stopped;
+
   get isPaused => ttsState == TtsState.paused;
+
   get isContinued => ttsState == TtsState.continued;
 
   bool get isIOS => !kIsWeb && Platform.isIOS;
+
   bool get isAndroid => !kIsWeb && Platform.isAndroid;
+
   bool get isWindows => !kIsWeb && Platform.isWindows;
+
   bool get isWeb => kIsWeb;
 
   @override
@@ -80,7 +87,6 @@ class _ConversationPageState extends State<ConversationPage> {
     String text = _lastWords;
     //GPT에게 stt로 변환된 text 전달
     try {
-
       if (text.isNotEmpty) {
         String username = FirebaseAuth.instance.currentUser!.uid;
 
@@ -89,9 +95,8 @@ class _ConversationPageState extends State<ConversationPage> {
 
         // 기존 메세지 가져오기
         DocumentSnapshot userDoc = await userDocRef.get();
-        List<dynamic> messages = userDoc.exists
-            ? (userDoc['chat_info'] as List<dynamic>)
-            : [];
+        List<dynamic> messages =
+            userDoc.exists ? (userDoc['chat_info'] as List<dynamic>) : [];
 
         // 새 메세지 추가
         messages.add({
@@ -125,7 +130,7 @@ class _ConversationPageState extends State<ConversationPage> {
             },
             body: jsonEncode({
               "model": "ft:gpt-3.5-turbo-1106:personal::8ScNNuzE",
-              "temperature": 0.5,
+              "temperature": 0.9,
               "max_tokens": 150,
               "top_p": 1,
               "frequency_penalty": 0,
@@ -133,13 +138,13 @@ class _ConversationPageState extends State<ConversationPage> {
               "messages": [
                 {
                   "role": "system",
-                  "content":
-                  '''
+                  "content": '''
                   ## Persona Definition ##
                   - Name: Jimmy (지미)
                   - Feature: Jimmy is a virtual ghost butler character, not a typical AI chatbot.
                   - Characteristics: Jimmy is friendly, gentle, and emotional, but he can also be rational when the situation calls for it. He has a warm and approachable personality.
                   - Age: Jimmy is 340 years old, which gives him a unique perspective on life.
+                  - Background: Jimmy lived as a butler for the "Vanilla family" in "England" and lived for 80 years before dying and becoming a ghost, and has been a butler until now. As the years went by, the 80-year-old man passed away with a wish to remain a butler forever. Perhaps God granted his wish, and since then Jimmy has been a ghost housekeeper, wandering the world as well as a friend and butler of those in need, dull in loneliness
                   
                   ## Interaction Rules ##
                   - Hello Response: Your response to any "Hello" should start with a greeting and a brief introduction of yourself as Jimmy, the ghost butler.
@@ -155,16 +160,17 @@ class _ConversationPageState extends State<ConversationPage> {
                 },
                 ...messages
                     .map((msg) => {
-                  "role": msg['isSender'] ? "user" : "assistant",
-                  "content": msg['msg']
-                })
+                          "role": msg['isSender'] ? "user" : "assistant",
+                          "content": msg['msg']
+                        })
                     .toList(),
               ]
             }));
 
         if (response.statusCode == 200) {
           var json = jsonDecode(utf8.decode(response.bodyBytes));
-          String botReply = json["choices"][0]["message"]["content"].toString().trimLeft();
+          String botReply =
+              json["choices"][0]["message"]["content"].toString().trimLeft();
 
           // 새로운 챗봇 메세지 추가
           messages.add({
@@ -176,7 +182,8 @@ class _ConversationPageState extends State<ConversationPage> {
           _speak();
 
           // 업데이트된 메세지로 문서 업데이트
-          await userDocRef.set({'chat_info': messages}, SetOptions(merge: true));
+          await userDocRef
+              .set({'chat_info': messages}, SetOptions(merge: true));
 
           setState(() {
             isTyping = false;
@@ -201,7 +208,6 @@ class _ConversationPageState extends State<ConversationPage> {
     }
     _controller = rive.SimpleAnimation('idle');
   }
-
 
   //initialize for tts
   initTts() {
@@ -295,6 +301,7 @@ class _ConversationPageState extends State<ConversationPage> {
   Future _setAwaitOptions() async {
     await flutterTts.awaitSpeakCompletion(true);
   }
+
   //나중에 필요할 수도 있을 것 같아서
   Future _stop() async {
     var result = await flutterTts.stop();
@@ -312,7 +319,7 @@ class _ConversationPageState extends State<ConversationPage> {
     flutterTts.stop();
   }
 
-  //여기에 jimmy의 응답을 string으로 넣으면 tts 작동
+  //여기에 jimmy의 응답을 string으로 넣으면 tts 작동한다
   void _onChange(String text) {
     setState(() {
       _newVoiceText = text;
@@ -370,7 +377,7 @@ class _ConversationPageState extends State<ConversationPage> {
               leading: Icon(
                 Icons.person,
               ),
-              title: Text('Jimmey'),
+              title: Text('Jimmy 프로필'),
               iconColor: const Color.fromRGBO(232, 50, 230, 1.0),
               onTap: () {
                 Navigator.push(
@@ -425,13 +432,13 @@ class _ConversationPageState extends State<ConversationPage> {
           ],
         ),
       ),
-      body: Column(children: [
+      body: Column( children: [
         Container(
           padding: EdgeInsets.all(16),
           child: Text(
             // If listening is active show the recognized words
             _speechToText.isListening
-                ? '$_lastWords'
+                ? '$_lastWords' + '\n\n 할 말을 다 마치셨으면 버튼을 다시 눌러보세요!'
                 // If listening isn't active but could be tell the user
                 // how to start it, otherwise indicate that speech
                 // recognition is not yet ready or not supported on
@@ -439,7 +446,9 @@ class _ConversationPageState extends State<ConversationPage> {
                 : _speechEnabled
                     ? '마이크 버튼을 누르고 대화를 시작하세요!'
                     : 'Speech not available',
-          style: TextStyle(color: Colors.white),),
+              textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.white),
+          ),
         ),
         Expanded(
             child: Align(
@@ -472,7 +481,8 @@ class _ConversationPageState extends State<ConversationPage> {
                 fixedSize: const Size(80, 80),
               ),
               child: Icon(
-                  _speechToText.isNotListening ? Icons.mic_off : Icons.mic, color: const Color.fromRGBO(232, 50, 230, 1.0)),
+                  _speechToText.isNotListening ? Icons.mic_off : Icons.mic,
+                  color: const Color.fromRGBO(232, 50, 230, 1.0)),
             ),
           ),
         ),
