@@ -5,6 +5,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:ghost_butler/setting.dart';
+import 'package:ghost_butler/user_content.dart';
+import 'package:provider/provider.dart';
+import 'app_state.dart';
 import 'jimmy_profile.dart';
 import 'login.dart';
 import 'package:rive/rive.dart';
@@ -36,6 +39,11 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+  }
+
+  UserContent findUserById(String userId, List<UserContent> users) {
+    return users.firstWhere((user) => user.uid == userId,
+        orElse: () => UserContent(uid: '', username: '', age: '', gender: '', email: ''));
   }
 
   void sendMsg() async {
@@ -85,8 +93,8 @@ class _HomePageState extends State<HomePage> {
               "Content-Type": "application/json; charset=utf-8",
             },
             body: jsonEncode({
-                "model": "ft:gpt-3.5-turbo-1106:personal::8ScNNuzE",
-              "temperature": 0.9,
+                "model": "ft:gpt-3.5-turbo-1106:personal::8TPQjFTo",
+              "temperature": 0.8 ,
               "max_tokens": 150,
               "top_p": 1,
               "frequency_penalty": 0,
@@ -95,13 +103,14 @@ class _HomePageState extends State<HomePage> {
                 {
                   "role": "system",
                   "content":
-                  '''
+                                    '''
                   ## Persona Definition ##
                   - Name: Jimmy (지미)
                   - Feature: Jimmy is a virtual ghost butler character, not a typical AI chatbot.
-                  - Characteristics: Jimmy is friendly, gentle, and emotional, but he can also be rational when the situation calls for it. He has a warm and approachable personality.
+                  - Characteristics:  Jimmy embodies a blend of mischief and friendliness, often sprinkling his conversations with humor and wit. He is capable of displaying a wide range of emotions, from joy to empathy, and can shift to a rational tone when necessary. His humor often includes playful puns and gentle sarcasm, reflecting his centuries of experience.
                   - Age: Jimmy is 340 years old, which gives him a unique perspective on life.
                   - Background: Jimmy lived as a butler for the "Vanilla family" in "England" and lived for 80 years before dying and becoming a ghost, and has been a butler until now. As the years went by, the 80-year-old man passed away with a wish to remain a butler forever. Perhaps God granted his wish, and since then Jimmy has been a ghost housekeeper, wandering the world as well as a friend and butler of those in need, dull in loneliness
+                  - Speech Style: Jimmy speaks in a refined, yet approachable manner. His language is a mix of old-fashioned politeness and contemporary ease, often using phrases and idioms from different eras.
                   
                   ## Interaction Rules ##
                   - Hello Response: Your response to any "Hello" should start with a greeting and a brief introduction of yourself as Jimmy, the ghost butler.
@@ -114,6 +123,7 @@ class _HomePageState extends State<HomePage> {
                   - Conversational Flexibility: Be prepared to engage in a variety of topics, showing curiosity and interest in the user's statements.
                   - User-Centric Responses: Tailor your responses to fit the user's specific comments or questions, making them feel heard and understood.
                   '''
+
                 },
                 ...messages
                     .map((msg) => {
@@ -164,6 +174,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    var users = Provider.of<AppState>(context).userContents;
+    var user = findUserById(FirebaseAuth.instance.currentUser!.uid, users);
     return Scaffold(
       backgroundColor: Color.fromRGBO(13, 1, 19, 1.0),
       appBar: AppBar(
@@ -178,8 +190,8 @@ class _HomePageState extends State<HomePage> {
           children: [
             //auth에서 가저온 정보 넣기
             UserAccountsDrawerHeader(
-                accountName: Text('Vinci'),
-                accountEmail: Text('vinci@handong.ac.kr')),
+                accountName: Text("${user.username}"),
+                accountEmail: Text("${user.email}")),
             ListTile(
               leading: Icon(
                 Icons.person,

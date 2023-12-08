@@ -51,8 +51,12 @@ class _LoginPageState extends State<LoginPage> {
         if (!snapshot.exists) {
           //make document in user collection
           FirebaseFirestore.instance.collection('user').doc(user?.uid).set({
-            'uid': user?.uid,
-            'email': user?.email,
+            'uid' : user?.uid,
+            'username' : '',
+            'age' : '',
+            'gender' : '',
+            'email' : user?.email,
+
           });
         }
       });
