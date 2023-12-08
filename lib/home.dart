@@ -5,6 +5,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:ghost_butler/setting.dart';
+import 'package:ghost_butler/user_content.dart';
+import 'package:provider/provider.dart';
+import 'app_state.dart';
 import 'jimmy_profile.dart';
 import 'login.dart';
 import 'package:rive/rive.dart';
@@ -36,6 +39,11 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+  }
+
+  UserContent findUserById(String userId, List<UserContent> users) {
+    return users.firstWhere((user) => user.uid == userId,
+        orElse: () => UserContent(uid: '', username: '', age: '', gender: '', email: ''));
   }
 
   void sendMsg() async {
@@ -164,6 +172,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    var users = Provider.of<AppState>(context).userContents;
+    var user = findUserById(FirebaseAuth.instance.currentUser!.uid, users);
     return Scaffold(
       backgroundColor: Color.fromRGBO(13, 1, 19, 1.0),
       appBar: AppBar(
@@ -178,8 +188,8 @@ class _HomePageState extends State<HomePage> {
           children: [
             //auth에서 가저온 정보 넣기
             UserAccountsDrawerHeader(
-                accountName: Text('Vinci'),
-                accountEmail: Text('vinci@handong.ac.kr')),
+                accountName: Text("${user.username}"),
+                accountEmail: Text("${user.email}")),
             ListTile(
               leading: Icon(
                 Icons.person,
