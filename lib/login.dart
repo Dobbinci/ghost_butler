@@ -16,21 +16,22 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-
-  //Google sing-in
+  //Google sign-in
   Future<UserCredential> googleSignIn() async {
     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-    final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+    final GoogleSignInAuthentication? googleAuth =
+        await googleUser?.authentication;
 
     final credential = GoogleAuthProvider.credential(
       accessToken: googleAuth?.accessToken,
       idToken: googleAuth?.idToken,
     );
     UserCredential userCredential =
-    await FirebaseAuth.instance.signInWithCredential(credential);
+        await FirebaseAuth.instance.signInWithCredential(credential);
     User? user = userCredential.user;
 
-    DocumentReference docRef = FirebaseFirestore.instance.collection('user').doc(user?.uid);
+    DocumentReference docRef =
+        FirebaseFirestore.instance.collection('user').doc(user?.uid);
     DocumentSnapshot documentSnapshot = await docRef.get();
 
     if (documentSnapshot.exists) {
@@ -40,8 +41,7 @@ class _LoginPageState extends State<LoginPage> {
           builder: (context) => const HomePage(),
         ),
       );
-    }
-    else {
+    } else {
       //user document 생성
       FirebaseFirestore.instance
           .collection('user')
@@ -63,8 +63,6 @@ class _LoginPageState extends State<LoginPage> {
         ),
       );
     }
-
-
 
     return userCredential;
   }
@@ -154,19 +152,26 @@ class _LoginPageState extends State<LoginPage> {
               Positioned(
                   top: height * 0.7,
                   child: ElevatedButton(
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(
-                        Colors.white,
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all<Color>(
+                          Colors.white,
+                        ),
+                        minimumSize:
+                            MaterialStateProperty.all<Size>(Size(150, 50)),
                       ),
-                      minimumSize:
-                          MaterialStateProperty.all<Size>(Size(150, 50)),
-                    ),
-                    onPressed: () {
-                      googleSignIn();
-                    },
-                    child: Text("Sign in with Google",
-                        style: TextStyle(fontSize: 18, color: Colors.black)),
-                  )),
+                      onPressed: () {
+                        googleSignIn();
+                      },
+                      child: Row(
+
+                        children: <Widget>[
+                          Image.asset('assets/images/google_logo.png', height: 25.0),
+                          SizedBox(width: 8.0),
+                          Text("Sign in with Google",
+                              style:
+                                  TextStyle(fontSize: 17, color: Colors.black)),
+                        ],
+                      ))),
             ],
           )),
         ],
