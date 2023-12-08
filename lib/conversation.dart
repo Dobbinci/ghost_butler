@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:ghost_butler/setting.dart';
 import 'package:ghost_butler/user_content.dart';
 import 'package:provider/provider.dart';
 import 'app_state.dart';
@@ -35,9 +36,7 @@ class ConversationPage extends StatefulWidget {
 enum TtsState { playing, stopped, paused, continued }
 
 class _ConversationPageState extends State<ConversationPage> {
-  late RiveAnimationController _controller;
-
-  //fields for GPT
+  //fields for messaging
   List<Message> msgs = [];
   bool isTyping = false;
 
@@ -88,7 +87,8 @@ class _ConversationPageState extends State<ConversationPage> {
 
   UserContent findUserById(String userId, List<UserContent> users) {
     return users.firstWhere((user) => user.uid == userId,
-        orElse: () => UserContent(uid: '', username: '', age: '', gender: '', email: ''));
+        orElse: () =>
+            UserContent(uid: '', username: '', age: '', gender: '', email: ''));
   }
 
   void sendMsg() async {
@@ -137,7 +137,7 @@ class _ConversationPageState extends State<ConversationPage> {
               "Content-Type": "application/json; charset=utf-8",
             },
             body: jsonEncode({
-              "model": "ft:gpt-3.5-turbo-1106:personal::8ScNNuzE",
+              "model": "ft:gpt-3.5-turbo-1106:personal::8TPQjFTo",
               "temperature": 0.9,
               "max_tokens": 150,
               "top_p": 1,
@@ -214,7 +214,6 @@ class _ConversationPageState extends State<ConversationPage> {
       ));
       print(errorMessage);
     }
-    _controller = rive.SimpleAnimation('idle');
   }
 
   //initialize for tts
@@ -327,36 +326,32 @@ class _ConversationPageState extends State<ConversationPage> {
     flutterTts.stop();
   }
 
-  //여기에 jimmy의 응답을 string으로 넣으면 tts 작동한다
+  // TTS
   void _onChange(String text) {
     setState(() {
       _newVoiceText = text;
     });
   }
 
-  /// This has to happen only once per app
+  // initializing TTS
   void _initSpeech() async {
     _speechEnabled = await _speechToText.initialize();
     setState(() {});
   }
 
-  /// Each time to start a speech recognition session
+  // recognizing voice
   void _startListening() async {
     await _speechToText.listen(onResult: _onSpeechResult, localeId: 'ko-KR');
     setState(() {});
   }
 
-  /// Manually stop the active speech recognition session
-  /// Note that there are also timeouts that each platform enforces
-  /// and the SpeechToText plugin supports setting timeouts on the
-  /// listen method.
+  // Stop recognizing
   void _stopListening() async {
     await _speechToText.stop();
     setState(() {});
   }
 
-  /// This is the callback that the SpeechToText plugin calls when
-  /// the platform returns recognized words.
+  // returns the recognized words from the platform
   void _onSpeechResult(SpeechRecognitionResult result) {
     setState(() {
       _lastWords = result.recognizedWords;
@@ -420,7 +415,12 @@ class _ConversationPageState extends State<ConversationPage> {
               title: Text('환경설정'),
               iconColor: const Color.fromRGBO(232, 50, 230, 1.0),
               onTap: () {
-                Navigator.pushNamed(context, '/favorite');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SettingPage(),
+                  ),
+                );
               },
             ),
             ListTile(
@@ -442,22 +442,19 @@ class _ConversationPageState extends State<ConversationPage> {
           ],
         ),
       ),
-      body: Column( children: [
+      body: Column(children: [
         Container(
           padding: EdgeInsets.all(16),
           child: Text(
             // If listening is active show the recognized words
             _speechToText.isListening
                 ? '$_lastWords' + '\n\n 할 말을 다 마치셨으면 버튼을 다시 눌러보세요!'
-                // If listening isn't active but could be tell the user
-                // how to start it, otherwise indicate that speech
-                // recognition is not yet ready or not supported on
-                // the target device
+                // If listening isn't active, direction message is shown
                 : _speechEnabled
                     ? '마이크 버튼을 누르고 대화를 시작하세요!'
                     : 'Speech not available',
-              textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white),
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.grey),
           ),
         ),
         Expanded(
