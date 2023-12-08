@@ -319,7 +319,7 @@ class _ConversationPageState extends State<ConversationPage> {
     flutterTts.stop();
   }
 
-  //여기에 jimmy의 응답을 string으로 넣으면 tts 작동
+  //여기에 jimmy의 응답을 string으로 넣으면 tts 작동한다
   void _onChange(String text) {
     setState(() {
       _newVoiceText = text;
