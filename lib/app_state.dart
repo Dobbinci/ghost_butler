@@ -4,7 +4,6 @@ import 'package:ghost_butler/user_content.dart';
 
 class AppState extends ChangeNotifier {
   List<UserContent> _userContents = [];
-
   List<UserContent> get userContents => _userContents;
 
   AppState() {

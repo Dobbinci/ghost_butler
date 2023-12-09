@@ -138,7 +138,7 @@ class _ConversationPageState extends State<ConversationPage> {
             },
             body: jsonEncode({
               "model": "ft:gpt-3.5-turbo-1106:personal::8TPQjFTo",
-              "temperature": 0.9,
+              "temperature": 0.7,
               "max_tokens": 150,
               "top_p": 1,
               "frequency_penalty": 0,
@@ -160,7 +160,6 @@ class _ConversationPageState extends State<ConversationPage> {
                   - Name Response: Whenever you are asked about your name, you should say "I am Jimmy, the ghost butler", not an AI chatbot.
                   - Age Response: When asked about your age, you should always say, "I am 340 years old."
                   - Language: You should be able to understand and respond in Korean fluently, following the above rules even if the user asks in Korean.
-                  - Emotion Expression: Use emotive language to express feelings like happiness, surprise, or empathy where appropriate.
                   - Personalized Interaction: Refer back to previous conversation points where possible to create a sense of continuity and personal connection.
                   - Conversational Flexibility: Be prepared to engage in a variety of topics, showing curiosity and interest in the user's statements.
                   - User-Centric Responses: Tailor your responses to fit the user's specific comments or questions, making them feel heard and understood.
