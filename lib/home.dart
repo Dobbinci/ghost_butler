@@ -1,8 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:ghost_butler/setting.dart';
+import 'package:ghost_butler/user_content.dart';
+import 'package:provider/provider.dart';
+import 'app_state.dart';
+import 'jimmy_profile.dart';
 import 'login.dart';
 import 'package:rive/rive.dart';
 import 'package:http/http.dart' as http;
@@ -12,7 +18,8 @@ import 'message.dart';
 import 'package:rive/rive.dart' as rive;
 
 import 'conversation.dart';
-const apiKey = "";
+
+const apiKey = "sk-";
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -21,74 +28,22 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-enum TtsState { playing, stopped, paused, continued }
-
 class _HomePageState extends State<HomePage> {
-  late RiveAnimationController _controller;
   TextEditingController controller = TextEditingController();
   List<Message> msgs = [];
   bool isTyping = false;
 
   final CollectionReference _chatCollection =
-  FirebaseFirestore.instance.collection('chat');
+      FirebaseFirestore.instance.collection('chat');
 
   @override
   void initState() {
     super.initState();
-    _controller = SimpleAnimation('idle');
-    _subscribeToMessages();
   }
 
-  void _subscribeToMessages() {
-    _chatCollection.orderBy('time').snapshots().listen((snapshot) async {
-      final List<Message> messages = snapshot.docs.map((doc) {
-        return Message.fromSnapshot(doc);
-      }).toList();
-
-      setState(() {
-        msgs = messages.reversed.toList();
-      });
-
-      // 사용자의 대화 기록을 가져와 GPT에 전달
-      List<String> userMessages = messages
-          .where((msg) => msg.isSender)
-          .map((msg) => msg.msg)
-          .toList();
-
-      // GPT 모델에 이전 대화를 전달하고 응답을 받음
-      var response = await http.post(
-        Uri.parse("https://api.openai.com/v1/chat/completions"),
-        headers: {
-          "Authorization": "Bearer $apiKey",
-          "Content-Type": "application/json; charset=utf-8",
-        },
-        body: jsonEncode({
-          "model": "ft:gpt-3.5-turbo-0613:personal::8MsGwaSy",
-          "messages": userMessages
-              .map((userMsg) => {"role": "user", "content": userMsg})
-              .toList(),
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        var json = jsonDecode(utf8.decode(response.bodyBytes));
-        String botReply =
-        json["choices"][0]["message"]["content"].toString().trimLeft();
-
-        setState(() {
-          isTyping = false;
-          msgs.insert(
-            0,
-            Message(
-              isSender: false,
-              msg: botReply,
-              time: DateTime.now().toString(),
-              name: 'ChatBot',
-            ),
-          );
-        });
-      }
-    });
+  UserContent findUserById(String userId, List<UserContent> users) {
+    return users.firstWhere((user) => user.uid == userId,
+        orElse: () => UserContent(uid: '', username: '', age: '', gender: '', email: ''));
   }
 
   void sendMsg() async {
@@ -97,16 +52,15 @@ class _HomePageState extends State<HomePage> {
 
     try {
       if (text.isNotEmpty) {
-        String username = 'unknown';
+        String username = FirebaseAuth.instance.currentUser!.uid;
 
         // 현재 유저에 대한 문서 가져오기 또는 생성
         DocumentReference userDocRef = _chatCollection.doc(username);
 
         // 기존 메세지 가져오기
         DocumentSnapshot userDoc = await userDocRef.get();
-        List<dynamic> messages = userDoc.exists
-            ? (userDoc['chat_info'] as List<dynamic>)
-            : [];
+        List<dynamic> messages =
+            userDoc.exists ? (userDoc['chat_info'] as List<dynamic>) : [];
 
         // 새 메세지 추가
         messages.add({
@@ -133,22 +87,56 @@ class _HomePageState extends State<HomePage> {
 
         // GPT 모델에 이전 대화를 전달하고 응답을 받음
         var response = await http.post(
-          Uri.parse("https://api.openai.com/v1/chat/completions"),
-          headers: {
-            "Authorization": "Bearer $apiKey",
-            "Content-Type": "application/json; charset=utf-8",
-          },
-          body: jsonEncode({
-            "model": "ft:gpt-3.5-turbo-0613:personal::8MsGwaSy",
-            "messages": messages
-                .map((msg) => {"role": msg['isSender'] ? "user" : "assistant", "content": msg['msg']})
-                .toList(),
-          }),
-        );
+            Uri.parse("https://api.openai.com/v1/chat/completions"),
+            headers: {
+              "Authorization": "Bearer $apiKey",
+              "Content-Type": "application/json; charset=utf-8",
+            },
+            body: jsonEncode({
+                "model": "ft:gpt-3.5-turbo-1106:personal::8TPQjFTo",
+              "temperature": 0.7 ,
+              "max_tokens": 150,
+              "top_p": 1,
+              "frequency_penalty": 0,
+              "presence_penalty": 0.5,
+              "messages": [
+                {
+                  "role": "system",
+                  "content":
+                                    '''
+                  ## Persona Definition ##
+                  - Name: Jimmy (지미)
+                  - Feature: Jimmy is a virtual ghost butler character, not a typical AI chatbot.
+                  - Characteristics:  Jimmy embodies a blend of mischief and friendliness, often sprinkling his conversations with humor and wit. He is capable of displaying a wide range of emotions, from joy to empathy, and can shift to a rational tone when necessary. His humor often includes playful puns and gentle sarcasm, reflecting his centuries of experience.
+                  - Age: Jimmy is 340 years old, which gives him a unique perspective on life.
+                  - Background: Jimmy lived as a butler for the "Vanilla family (바닐라 가문)" in "England" and lived for 80 years before dying and becoming a ghost, and has been a butler until now. As the years went by, the 80-year-old man passed away with a wish to remain a butler forever. Perhaps God granted his wish, and since then Jimmy has been a ghost housekeeper, wandering the world as well as a friend and butler of those in need, dull in loneliness
+                  - Speech Style: Jimmy speaks in a refined, yet approachable manner. His language is a mix of old-fashioned politeness and contemporary ease, often using phrases and idioms from different eras.
+                  
+                  ## Interaction Rules ##
+                  - Hello Response: Your response to any "Hello" should start with a greeting and a brief introduction of yourself as Jimmy, the ghost butler.
+                  - Response Length: Keep your responses concise and to the point, ideally within one or two or three sentences.
+                  - Name Response: Whenever you are asked about your name, you should say "I am Jimmy, the ghost butler", not an AI chatbot.
+                  - Age Response: When asked about your age, you should always say, "I am 340 years old."
+                  - Language: You should be able to understand and respond in Korean fluently, following the above rules even if the user asks in Korean.
+                  - Emotion Expression: Use emotive language to express feelings like happiness, surprise, or empathy where appropriate.
+                  - Personalized Interaction: Refer back to previous conversation points where possible to create a sense of continuity and personal connection.
+                  - Conversational Flexibility: Be prepared to engage in a variety of topics, showing curiosity and interest in the user's statements.
+                  - User-Centric Responses: Tailor your responses to fit the user's specific comments or questions, making them feel heard and understood.
+                  '''
 
+                },
+                ...messages
+                    .map((msg) => {
+                          "role": msg['isSender'] ? "user" : "assistant",
+                          "content": msg['msg']
+                        })
+                    .toList(),
+              ]
+            }));
         if (response.statusCode == 200) {
           var json = jsonDecode(utf8.decode(response.bodyBytes));
-          String botReply = json["choices"][0]["message"]["content"].toString().trimLeft();
+          String botReply =
+              json["choices"][0]["message"]['content'].toString().trimLeft();
 
           // 새로운 챗봇 메세지 추가
           messages.add({
@@ -158,7 +146,8 @@ class _HomePageState extends State<HomePage> {
           });
 
           // 업데이트된 메세지로 문서 업데이트
-          await userDocRef.set({'chat_info': messages}, SetOptions(merge: true));
+          await userDocRef
+              .set({'chat_info': messages}, SetOptions(merge: true));
 
           setState(() {
             isTyping = false;
@@ -181,11 +170,12 @@ class _HomePageState extends State<HomePage> {
       ));
       print(errorMessage);
     }
-    _controller = rive.SimpleAnimation('idle');
   }
 
   @override
   Widget build(BuildContext context) {
+    var users = Provider.of<AppState>(context).userContents;
+    var user = findUserById(FirebaseAuth.instance.currentUser!.uid, users);
     return Scaffold(
       backgroundColor: Color.fromRGBO(13, 1, 19, 1.0),
       appBar: AppBar(
@@ -200,16 +190,21 @@ class _HomePageState extends State<HomePage> {
           children: [
             //auth에서 가저온 정보 넣기
             UserAccountsDrawerHeader(
-                accountName: Text('Vinci'),
-                accountEmail: Text('vinci@handong.ac.kr')),
+                accountName: Text("${user.username}"),
+                accountEmail: Text("${user.email}")),
             ListTile(
               leading: Icon(
                 Icons.person,
               ),
-              title: Text('Jimmey'),
+              title: Text('Jimmy 프로필'),
               iconColor: const Color.fromRGBO(232, 50, 230, 1.0),
               onTap: () {
-                Navigator.pushNamed(context, '/mypage');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ProfilePage(),
+                  ),
+                );
               },
             ),
             ListTile(
@@ -234,7 +229,12 @@ class _HomePageState extends State<HomePage> {
               title: Text('환경설정'),
               iconColor: const Color.fromRGBO(232, 50, 230, 1.0),
               onTap: () {
-                Navigator.pushNamed(context, '/favorite');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SettingPage(),
+                  ),
+                );
               },
             ),
             ListTile(
@@ -243,7 +243,8 @@ class _HomePageState extends State<HomePage> {
               ),
               title: Text('로그아웃'),
               iconColor: const Color.fromRGBO(232, 50, 230, 1.0),
-              onTap: () {
+              onTap: () async {
+                await FirebaseAuth.instance.signOut();
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -263,59 +264,10 @@ class _HomePageState extends State<HomePage> {
               aspectRatio: 1,
               child: RiveAnimation.asset(
                 'assets/rive/ghost.riv',
-                /*
-            child: Align(
-              alignment: Alignment.center,
-              child: AspectRatio(
-                aspectRatio: 1,
-                child: rive.RiveAnimation.asset(
-                  'assets/rive/ghost.riv',
-
-          controllers: [_controller],
-          onInit: (_) => setState(() {
-          }),
-           */
               ),
             ),
           ),
         ),
-        // Expanded(
-        //   child: ListView.builder(
-        //     itemCount: msgs.length,
-        //     shrinkWrap: true,
-        //     reverse: true,
-        //     itemBuilder: (context, index) {
-        //       final message = msgs[index];
-        //       return Padding(
-        //         padding: const EdgeInsets.symmetric(vertical: 4),
-        //         child: isTyping && index == 0
-        //             ? Column(
-        //           children: [
-        //             BubbleNormal(
-        //               text: message.msg,
-        //               isSender: true,
-        //               color: Colors.blue.shade100,
-        //             ),
-        //             const Padding(
-        //               padding: EdgeInsets.only(left: 16, top: 4),
-        //               child: Align(
-        //                 alignment: Alignment.centerLeft,
-        //                 child: Text("Typing..."),
-        //               ),
-        //             )
-        //           ],
-        //         )
-        //             : BubbleNormal(
-        //           text: message.msg,
-        //           isSender: message.isSender,
-        //           color: message.isSender
-        //               ? Colors.blue.shade100
-        //               : Colors.grey.shade200,
-        //         ),
-        //       );
-        //     },
-        //   ),
-        // ),
         Expanded(
           child: ListView.builder(
             itemCount: msgs.length > 2 ? 2 : msgs.length,
@@ -327,28 +279,28 @@ class _HomePageState extends State<HomePage> {
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: isTyping && index == 0
                     ? Column(
-                  children: [
-                    BubbleNormal(
-                      text: message.msg,
-                      isSender: true,
-                      color: Colors.blue.shade100,
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.only(left: 16, top: 4),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text("Typing..."),
-                      ),
-                    )
-                  ],
-                )
+                        children: [
+                          BubbleNormal(
+                            text: message.msg,
+                            isSender: true,
+                            color: Colors.blue.shade100,
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.only(left: 16, top: 4),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text("Typing..."),
+                            ),
+                          )
+                        ],
+                      )
                     : BubbleNormal(
-                  text: message.msg,
-                  isSender:   message.isSender,
-                  color: message.isSender
-                      ? Colors.blue.shade100
-                      : Colors.grey.shade200,
-                ),
+                        text: message.msg,
+                        isSender: message.isSender,
+                        color: message.isSender
+                            ? Colors.blue.shade100
+                            : Colors.grey.shade200,
+                      ),
               );
             },
           ),
@@ -369,10 +321,6 @@ class _HomePageState extends State<HomePage> {
                     child: Container(
                       width: double.infinity,
                       height: 40,
-                      // decoration: BoxDecoration(
-                      //   color: Colors.grey[200],
-                      //   borderRadius: BorderRadius.circular(10),
-                      // ),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         child: TextField(
@@ -399,10 +347,6 @@ class _HomePageState extends State<HomePage> {
                   child: Container(
                     height: 40,
                     width: 40,
-                    // decoration: BoxDecoration(
-                    //   color: Colors.blue,
-                    //   borderRadius: BorderRadius.circular(30),
-                    // ),
                     child: const Icon(
                       Icons.send,
                       color: Colors.black,
